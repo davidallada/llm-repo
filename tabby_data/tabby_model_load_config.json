@@ -1,0 +1,27 @@
+{
+    "model_configs": [
+        {
+            "pretty_model_name": "qwen2.5-72b-4bpw-draft",
+            "model_name": "Qwen_Qwen2.5-72B-Instruct-4.0-bpw",
+            "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 8096
+            }
+        },
+        {
+            "pretty_model_name": "qwen2.5-coder-32B-8bpw-draft",
+            "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-8.0-bpw",
+            "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
+            "tabby_config": {}
+        },
+        {
+            "pretty_model_name": "qwen2.5-coder-32B-6bpw-draft",
+            "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-6.0-bpw",
+            "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
+            "tabby_config": {}
+        }
+
+    ],
+    "embedding_configs": [],
+    "lora_configs": []
+}

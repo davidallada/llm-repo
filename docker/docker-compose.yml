@@ -1,0 +1,72 @@
+services:
+  tabbyapi-base:
+    # Uncomment this to build a docker image from source
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: tabbyapi-exllamav2-builder-image-runtime
+
+    # Comment this to build a docker image from source
+    # image: ghcr.io/theroyallab/tabbyapi:latest
+    # ports:
+    #   - "5000:5000"
+    #   - "8076:8888"
+    runtime: nvidia
+    privileged: true # Required for mounting NFS
+    environment:
+      - NAME=TabbyAPI
+      - NVIDIA_VISIBLE_DEVICES=all
+      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
+      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
+      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
+    volumes:
+      - pip-cache:/cache/pip
+      - apt-cache:/cache/apt
+      - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
+      - /mnt/docker_data/llm-repo/model_directories:/app/model_directories
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  tabbyapi:
+    extends:
+      service: tabbyapi-base
+    container_name: tabbyapi-webserver
+    ports:
+      - "5000:5000"
+      - "8076:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: webserver
+
+  tabbyapi-converter:
+    extends:
+      service: tabbyapi-base
+    ports:
+      - "5001:5000"
+      - "8077:8888"
+    command: converter
+
+
+# curl http://10.69.1.169:5000/v1/model/load \
+#   -H "Content-Type: application/json" \
+#   -H "x-api-key: <api_key>" \
+#   -H "x-admin-key: <api_key>" \
+#   -H "Authorization: Bearer <api_key>" \
+#   -d '{
+#     "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-4.0",
+#     "draft_model": {
+#       "draft_model_name": "Qwen_Qwen2.5-Coder-0.5B-Instruct-4.0-bpw"
+#     }
+#   }'
+
+
+volumes:
+  pip-cache:
+  apt-cache:
