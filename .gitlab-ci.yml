@@ -1,6 +1,6 @@
 stages:
 - build
-# - cleanup
+- cleanup
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -51,6 +51,17 @@ cleanup:
   - docker:dind
   variables:
     GIT_STRATEGY: none
+    NFS_MOUNT_POINT: /mnt/container_registry
+    NFS_SERVER: 10.69.1.251
+    NFS_SHARE: /volume1/container_registry
+  before_script:
+  - apk add --no-cache nfs-utils
+  - mkdir -p $NFS_MOUNT_POINT
+  - echo "Mounting NFS share..."
+  - mount -t nfs4 $NFS_SERVER:$NFS_SHARE $NFS_MOUNT_POINT
+  - echo "Creating project directories..."
+  - mkdir -p $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/{current,archive}
+  - chown -R $(id -u):$(id -g) $NFS_MOUNT_POINT/${CI_PROJECT_PATH}
   script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - docker pull $CI_REGISTRY_IMAGE:latest
@@ -59,12 +70,17 @@ cleanup:
   - |
     for tag in $(docker images $CI_REGISTRY_IMAGE --format "{{.Tag}}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$"); do
       if [ "$tag" != "v$LATEST_VERSION" ] && [ "$tag" != "latest" ]; then
-        echo "Removing $CI_REGISTRY_IMAGE:$tag"
+        echo "Archiving $CI_REGISTRY_IMAGE:$tag"
+        docker save $CI_REGISTRY_IMAGE:$tag | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/archive/${tag}.tar.gz
         docker rmi $CI_REGISTRY_IMAGE:$tag
-        docker image rm $CI_REGISTRY_IMAGE:$tag
       fi
     done
+  - echo "Saving latest image..."
+  - docker save $CI_REGISTRY_IMAGE:latest | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/current/latest.tar.gz
   - docker image prune -f
+  after_script:
+  - echo "Unmounting NFS share..."
+  - umount $NFS_MOUNT_POINT
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     when: always
