@@ -17,6 +17,7 @@ docker-build:
     VERSION=$(cat docker/version.txt)
     NEW_VERSION=$(echo $VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
     echo $NEW_VERSION > docker/version.txt
+    echo "NEW_VERSION=$NEW_VERSION" >> build.env
   - |
     /kaniko/executor \
       --context "${CI_PROJECT_DIR}/docker" \
@@ -30,6 +31,28 @@ docker-build:
       --cache-repo "${CI_REGISTRY_IMAGE}/cache" \
       --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg VERSION=${NEW_VERSION}
+  artifacts:
+    reports:
+      dotenv: build.env
+    paths:
+    - docker/version.txt
+  rules:
+  - if: $CI_COMMIT_BRANCH
+    exists:
+    - docker/Dockerfile
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+    - docker/.cache
+
+update-version:
+  stage: build
+  image: alpine:latest
+  needs:
+  - job: docker-build
+    artifacts: true
+  script:
+  - apk add --no-cache git
   - git config --global user.email "gitlab-ci@example.com"
   - git config --global user.name "GitLab CI"
   - git add docker/version.txt
@@ -39,10 +62,6 @@ docker-build:
   - if: $CI_COMMIT_BRANCH
     exists:
     - docker/Dockerfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-    - docker/.cache
 
 cleanup:
   stage: cleanup
