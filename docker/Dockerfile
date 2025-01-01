@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1.4
 
+# Set a default value for VERSION
+ARG VERSION=debug
+
 # Stage 1: Build environment
 FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
 
@@ -7,7 +10,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    VERSION=${VERSION}
 
 # Create cache directories
 RUN mkdir -p /cache/apt /cache/pip
@@ -69,7 +73,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    VERSION=${VERSION}
 
 # Install runtime dependencies including Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -121,3 +126,8 @@ ENTRYPOINT ["/app/entrypoint/entrypoint.sh"]
 
 # Set a default command (optional)
 CMD ["webserver"]
+
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
+LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
+LABEL org.opencontainers.image.source="https://github.com/yourusername/yourrepository"

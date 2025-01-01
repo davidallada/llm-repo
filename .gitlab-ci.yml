@@ -12,7 +12,28 @@ docker-build:
   script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime --cache=true --cache-ttl=720h --cache-repo "${CI_REGISTRY_IMAGE}/cache" --build-arg BUILDKIT_INLINE_CACHE=1
+  - |
+    VERSION=$(cat docker/version.txt)
+    NEW_VERSION=$(echo $VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+    echo $NEW_VERSION > docker/version.txt
+  - |
+    /kaniko/executor \
+      --context "${CI_PROJECT_DIR}/docker" \
+      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" \
+      --destination "${CI_REGISTRY_IMAGE}:latest" \
+      --destination "${CI_REGISTRY_IMAGE}:v${NEW_VERSION}" \
+      --target tabbyapi-exllamav2-builder-image-runtime \
+      --cache=true \
+      --cache-ttl=720h \
+      --cache-repo "${CI_REGISTRY_IMAGE}/cache" \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      --build-arg VERSION=${NEW_VERSION}
+  - git config --global user.email "gitlab-ci@example.com"
+  - git config --global user.name "GitLab CI"
+  - git add docker/version.txt
+  - git commit -m "Bump version to ${NEW_VERSION} [skip ci]"
+  - git push https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
   rules:
   - if: $CI_COMMIT_BRANCH
     exists:
