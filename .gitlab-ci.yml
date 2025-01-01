@@ -1,5 +1,6 @@
 stages:
 - build
+- deploy
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -21,3 +22,11 @@ docker-build:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
     - docker/.cache
+
+trigger-webhook:
+  stage: deploy
+  image: curlimages/curl:latest
+  script:
+  - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
