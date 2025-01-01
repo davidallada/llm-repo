@@ -73,10 +73,6 @@
             "bpw": [4.0, 6.0, 8.0]
         },
         {
-            "model_name": "meta-llama/Llama-3.2-11B-Vision-Instruct",
-            "bpw": [4.0, 6.0, 8.0]
-        },
-        {
             "model_name": "meta-llama/Llama-3.2-3B-Instruct",
             "bpw": [4.0]
         },
