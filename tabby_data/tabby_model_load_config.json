@@ -112,8 +112,23 @@
             },
             "comment": "Big LLama"
         }
-        
     ],
-    "embedding_configs": [],
+    "embedding_configs": [
+        {
+            "pretty_model_name": "dunzhang_stella_en_1.5B_v5",
+            "model_name": "dunzhang_stella_en_1.5B_v5",
+            "comment": "Stella"
+        },
+        {
+            "pretty_model_name": "google_Gemma-Embeddings-v1.0",
+            "model_name": "google_Gemma-Embeddings-v1.0",
+            "comment": "Gemma"
+        },
+        {
+            "pretty_model_name": "answerdotai_ModernBERT-large",
+            "model_name": "answerdotai_ModernBERT-large",
+            "comment": "ModernBERT"
+        }
+    ],
     "lora_configs": []
 }
