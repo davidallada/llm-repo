@@ -47,7 +47,8 @@ download_model() {
             mv "/mnt/exllamav2/temp_hf_download/$formatted_string" "$gguf_dir/$formatted_string" && echo "Successfully downloaded using huggingface-cli"
         else
             echo "huggingface-cli download failed, trying hfdownloader..."
-            hfdownloader -m "$model_name" -c 10 -s "$gguf_dir"
+            hfdownloader -m "$model_name" -c 10 -s /mnt/exllamav2/temp_hf_download
+            mv "/mnt/exllamav2/temp_hf_download/$model_name" "$gguf_dir/$formatted_string" && echo "Successfully downloaded using huggingface-cli"
         fi
     fi
 }
