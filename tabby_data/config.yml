@@ -191,9 +191,9 @@ embeddings:
   embeddings_device: cpu
 
   # An initial embedding model to load on the infinity backend.
-  embedding_model_name:
+  embedding_model_name: dunzhang_stella_en_1.5B_v5
 
-    # Options for Sampling
+# Options for Sampling
 sampling:
   # Select a sampler override preset (default: None).
   # Find this in the sampler-overrides folder.
