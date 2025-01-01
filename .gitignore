@@ -5,3 +5,5 @@ tabby_data/api_tokens.yml
 tabby_data/.tabby_env
 
 # Add any other entries you want to ignore
+api_tokens.yml
+models/**
