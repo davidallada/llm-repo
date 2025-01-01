@@ -59,7 +59,7 @@ cleanup:
   - apk add --no-cache nfs-utils git
   - mkdir -p $NFS_MOUNT_POINT
   - echo "Mounting NFS share..."
-  - mount -t nfs4 $NFS_SERVER:$NFS_SHARE $NFS_MOUNT_POINT
+  - mount -t nfs4 $NFS_SERVER:$NFS_SHARE $NFS_MOUNT_POINT || (echo "Failed to mount NFS share" && exit 1)
   - echo "Creating project directories..."
   - mkdir -p $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/{current,archive}
   - chown -R $(id -u):$(id -g) $NFS_MOUNT_POINT/${CI_PROJECT_PATH}
@@ -89,8 +89,9 @@ cleanup:
   - docker save $CI_REGISTRY_IMAGE:latest | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/current/latest.tar.gz
   - docker image prune -f
   after_script:
-  - echo "Unmounting NFS share..."
-  - umount $NFS_MOUNT_POINT
+  - echo "Attempting to unmount NFS share..."
+  - umount $NFS_MOUNT_POINT || echo "Failed to unmount NFS share. This is not necessarily an error if the mount was never successful."
+  - echo "Cleanup completed."
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     when: always
