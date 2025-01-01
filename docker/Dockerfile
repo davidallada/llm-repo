@@ -45,7 +45,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     /venv/bin/pip install --no-cache-dir pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
     /venv/bin/pip install -U --no-cache-dir "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install --no-cache-dir flash-attn --no-build-isolation && \
-    /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+    /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars && \
+    /venv/bin/pip install --no-cache-dir .[extras]
 
 # Install hfdownloader
 # Wget go for hfdownloader
