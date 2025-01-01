@@ -45,8 +45,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     /venv/bin/pip install --no-cache-dir pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
     /venv/bin/pip install -U --no-cache-dir "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install --no-cache-dir flash-attn --no-build-isolation && \
-    /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars && \
-    cd /app/exllamav2 && /venv/bin/pip install --no-cache-dir .[extras] && cd /app
+    /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+
 
 # Install hfdownloader
 # Wget go for hfdownloader
@@ -59,7 +59,8 @@ RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/Build
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121"
+    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
+    pip install --no-cache-dir .[extras]"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
