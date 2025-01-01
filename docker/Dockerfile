@@ -121,13 +121,14 @@ RUN chmod +x /app/entrypoint/*.sh
 # Expose ports for Jupyter Lab and exllamav2
 EXPOSE 8888 5000
 
+# Add LABELs near the end of your Dockerfile
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
+LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
+LABEL org.opencontainers.image.source="https://github.com/yourusername/yourrepository"
+
 # Set the entrypoint to activate the virtual environment and then execute the command
 ENTRYPOINT ["/app/entrypoint/entrypoint.sh"]
 
 # Set a default command (optional)
 CMD ["webserver"]
-
-LABEL org.opencontainers.image.version="${VERSION}"
-LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
-LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
-LABEL org.opencontainers.image.source="https://github.com/yourusername/yourrepository"
