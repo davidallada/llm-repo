@@ -15,14 +15,14 @@ config_file="/app/tabby_data/converter_config.json"
 
 # Source the virtual environment and set up Hugging Face login
 source /venv/bin/activate
-if [ -f /app/.exllamav2_env ]; then
-    source /app/.exllamav2_env
+if [ -f /app/tabby_data/.tabby_env ]; then
+    source /app/tabby_data/.tabby_env
     if [ ! -z "$HF_ACCESS_TOKEN" ]; then
         echo "Attempting to log in to Hugging Face..."
         huggingface-cli login --token $HF_ACCESS_TOKEN || echo "Hugging Face login failed, continuing anyway..."
     fi
 else
-    echo "No .exllamav2_env file found, skipping Hugging Face login..."
+    echo "No .tabby_env file found, skipping Hugging Face login..."
 fi
 
 # Function to convert model name to a formatted string
