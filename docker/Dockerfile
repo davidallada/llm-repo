@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.4
 
 # Stage 1: Build environment
 FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
@@ -13,7 +13,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
 RUN mkdir -p /cache/apt /cache/pip
 
 # Install system dependencies
-RUN --mount=type=cache,target=/cache/apt \
+RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -39,7 +39,7 @@ RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
 # Install pip and packages within the virtual environment
-RUN --mount=type=cache,target=/cache/pip \
+RUN --mount=type=cache,target=/root/.cache/pip \
     /venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
     /venv/bin/pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
     /venv/bin/pip install --no-cache-dir pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
