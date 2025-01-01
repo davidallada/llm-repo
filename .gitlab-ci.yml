@@ -1,6 +1,5 @@
 stages:
 - build
-- cleanup
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -13,29 +12,7 @@ docker-build:
   script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  - |
-    VERSION=$(cat docker/version.txt)
-    NEW_VERSION=$(echo $VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-    echo $NEW_VERSION > docker/version.txt
-    echo "NEW_VERSION=$NEW_VERSION" >> build.env
-  - |
-    /kaniko/executor \
-      --context "${CI_PROJECT_DIR}/docker" \
-      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
-      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" \
-      --destination "${CI_REGISTRY_IMAGE}:latest" \
-      --destination "${CI_REGISTRY_IMAGE}:v${NEW_VERSION}" \
-      --target tabbyapi-exllamav2-builder-image-runtime \
-      --cache=true \
-      --cache-ttl=720h \
-      --cache-repo "${CI_REGISTRY_IMAGE}/cache" \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --build-arg VERSION=${NEW_VERSION}
-  artifacts:
-    reports:
-      dotenv: build.env
-    paths:
-    - docker/version.txt
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime --cache=true --cache-ttl=720h --cache-repo "${CI_REGISTRY_IMAGE}/cache" --build-arg BUILDKIT_INLINE_CACHE=1
   rules:
   - if: $CI_COMMIT_BRANCH
     exists:
@@ -44,74 +21,3 @@ docker-build:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
     - docker/.cache
-
-update-version:
-  stage: build
-  image: alpine:latest
-  needs:
-  - job: docker-build
-    artifacts: true
-  script:
-  - apk add --no-cache git
-  - git config --global user.email "gitlab-ci@example.com"
-  - git config --global user.name "GitLab CI"
-  - git add docker/version.txt
-  - git commit -m "Bump version to ${NEW_VERSION} [skip ci]"
-  - git push https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
-  rules:
-  - if: $CI_COMMIT_BRANCH
-    exists:
-    - docker/Dockerfile
-
-cleanup:
-  stage: cleanup
-  image: docker:latest
-  services:
-  - docker:dind
-  variables:
-    GIT_STRATEGY: none
-    NFS_MOUNT_POINT: /mnt/container_registry
-    NFS_SERVER: 10.69.1.251
-    NFS_SHARE: /volume1/container_registry
-    VERSIONS_TO_KEEP: 4 # Latest + 3 older versions
-  before_script:
-  - apk add --no-cache nfs-utils git
-  - mkdir -p $NFS_MOUNT_POINT
-  - echo "Mounting NFS share..."
-  - mount -t nfs4 $NFS_SERVER:$NFS_SHARE $NFS_MOUNT_POINT || (echo "Failed to mount NFS share" && exit 1)
-  - echo "Creating project directories..."
-  - mkdir -p $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/{current,archive}
-  - chown -R $(id -u):$(id -g) $NFS_MOUNT_POINT/${CI_PROJECT_PATH}
-  script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  - docker pull $CI_REGISTRY_IMAGE:latest
-  - LATEST_VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' $CI_REGISTRY_IMAGE:latest)
-  - echo "Latest version is $LATEST_VERSION"
-  - |
-    # Get all version tags sorted in descending order
-    ALL_VERSIONS=$(docker images $CI_REGISTRY_IMAGE --format "{{.Tag}}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | sort -rV)
-    # Get the versions to keep (latest + 3 older)
-    VERSIONS_TO_KEEP=$(echo "$ALL_VERSIONS" | head -n $VERSIONS_TO_KEEP)
-    echo "Versions to keep: $VERSIONS_TO_KEEP"
-
-    for tag in $ALL_VERSIONS; do
-      if echo "$VERSIONS_TO_KEEP" | grep -q "$tag"; then
-        echo "Keeping $CI_REGISTRY_IMAGE:$tag"
-        docker save $CI_REGISTRY_IMAGE:$tag | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/current/${tag}.tar.gz
-      else
-        echo "Archiving $CI_REGISTRY_IMAGE:$tag"
-        docker save $CI_REGISTRY_IMAGE:$tag | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/archive/${tag}.tar.gz
-        docker rmi $CI_REGISTRY_IMAGE:$tag
-      fi
-    done
-  - echo "Saving latest image..."
-  - docker save $CI_REGISTRY_IMAGE:latest | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/current/latest.tar.gz
-  - docker image prune -f
-  after_script:
-  - echo "Attempting to unmount NFS share..."
-  - umount $NFS_MOUNT_POINT || echo "Failed to unmount NFS share. This is not necessarily an error if the mount was never successful."
-  - echo "Cleanup completed."
-  rules:
-  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    when: always
-  allow_failure: true
