@@ -117,6 +117,12 @@ process_model_config() {
         echo "GGUF model $formatted_string already exists. Skipping download."
     fi
 
+    if [ ${#bpw_values[@]} -eq 0 ]; then
+        echo "No BPW values provided for $formatted_string. Syncing GGUF to EXL2 directory without conversion."
+        rclone sync "$gguf_dir/$formatted_string" "$exl2_dir/$formatted_string" --transfers=12 --checkers=12 --size-only --progress
+        return
+    fi
+
     if [ ! -f "$measurement_json_dir/$formatted_string/measurement.json" ]; then
         process_measurements_json "$model_name"
     else
