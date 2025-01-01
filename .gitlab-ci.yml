@@ -54,6 +54,7 @@ cleanup:
     NFS_MOUNT_POINT: /mnt/container_registry
     NFS_SERVER: 10.69.1.251
     NFS_SHARE: /volume1/container_registry
+    VERSIONS_TO_KEEP: 4 # Latest + 3 older versions
   before_script:
   - apk add --no-cache nfs-utils
   - mkdir -p $NFS_MOUNT_POINT
@@ -68,8 +69,17 @@ cleanup:
   - LATEST_VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' $CI_REGISTRY_IMAGE:latest)
   - echo "Latest version is $LATEST_VERSION"
   - |
-    for tag in $(docker images $CI_REGISTRY_IMAGE --format "{{.Tag}}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$"); do
-      if [ "$tag" != "v$LATEST_VERSION" ] && [ "$tag" != "latest" ]; then
+    # Get all version tags sorted in descending order
+    ALL_VERSIONS=$(docker images $CI_REGISTRY_IMAGE --format "{{.Tag}}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | sort -rV)
+    # Get the versions to keep (latest + 3 older)
+    VERSIONS_TO_KEEP=$(echo "$ALL_VERSIONS" | head -n $VERSIONS_TO_KEEP)
+    echo "Versions to keep: $VERSIONS_TO_KEEP"
+
+    for tag in $ALL_VERSIONS; do
+      if echo "$VERSIONS_TO_KEEP" | grep -q "$tag"; then
+        echo "Keeping $CI_REGISTRY_IMAGE:$tag"
+        docker save $CI_REGISTRY_IMAGE:$tag | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/current/${tag}.tar.gz
+      else
         echo "Archiving $CI_REGISTRY_IMAGE:$tag"
         docker save $CI_REGISTRY_IMAGE:$tag | gzip > $NFS_MOUNT_POINT/${CI_PROJECT_PATH}/archive/${tag}.tar.gz
         docker rmi $CI_REGISTRY_IMAGE:$tag
