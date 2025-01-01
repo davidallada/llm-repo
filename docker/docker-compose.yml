@@ -1,16 +1,13 @@
 services:
   tabbyapi-base:
     # Uncomment this to build a docker image from source
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      target: tabbyapi-exllamav2-builder-image-runtime
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    #   target: tabbyapi-exllamav2-builder-image-runtime
 
     # Comment this to build a docker image from source
-    # image: ghcr.io/theroyallab/tabbyapi:latest
-    # ports:
-    #   - "5000:5000"
-    #   - "8076:8888"
+    image: gitlab-registry.rancher.devguy.dev/davidallada/llm-gpu-clone
     runtime: nvidia
     privileged: true # Required for mounting NFS
     environment:
@@ -24,6 +21,7 @@ services:
       - apt-cache:/cache/apt
       - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-repo/model_directories:/app/model_directories
+    command: exit
     deploy:
       resources:
         reservations:
@@ -35,6 +33,7 @@ services:
     extends:
       service: tabbyapi-base
     container_name: tabbyapi-webserver
+    restart: always
     ports:
       - "5000:5000"
       - "8076:8888"
@@ -46,6 +45,7 @@ services:
     command: webserver
 
   tabbyapi-converter:
+    restart: always
     extends:
       service: tabbyapi-base
     ports:

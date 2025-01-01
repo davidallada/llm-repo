@@ -96,7 +96,7 @@ quantize_gguf_to_exl2() {
     fi
 }
 
-# Function to download a model and then quantize it
+# Function to download a model and then quantize it (if needed)
 download_and_quantize() {
     local model_name=$1
     shift
@@ -105,12 +105,20 @@ download_and_quantize() {
     # First download the model
     download_model $model_name
 
-    # Then create the measurements.json file
-    process_measurements_json $model_name
+    local formatted_string=$(model_name_to_formatted_string "$model_name")
 
-    for bpw in "${bpw_values[@]}"; do
-        quantize_gguf_to_exl2 $model_name $bpw
-    done
+    if [ ${#bpw_values[@]} -eq 0 ]; then
+        echo "No BPW values provided for $formatted_string. Syncing GGUF to EXL2 directory without conversion."
+        mkdir -p "$exl2_dir/$formatted_string"
+        rclone sync "$gguf_dir/$formatted_string" "$exl2_dir/$formatted_string" --transfers=12 --checkers=12 --size-only --progress
+    else
+        # Then create the measurements.json file
+        process_measurements_json $model_name
+
+        for bpw in "${bpw_values[@]}"; do
+            quantize_gguf_to_exl2 $model_name $bpw
+        done
+    fi
 }
 
 # Function to process the list of models and quantizations
@@ -126,8 +134,8 @@ process_model_list() {
         local model_name="$1"
         local bpw_values="$2"
 
-        # Check if both model_name and bpw_values are provided
-        if [ -n "$model_name" ] && [ -n "$bpw_values" ]; then
+        # Check if model_name is provided
+        if [ -n "$model_name" ]; then
             echo "Processing model: $model_name with BPW values: $bpw_values"
             download_and_quantize "$model_name" ${bpw_values//,/ }
         else
@@ -137,7 +145,7 @@ process_model_list() {
         # Shift to the next pair of arguments
         shift 2
         if [ $? -ne 0 ]; then
-            echo "Error: Odd number of arguments. Each model must have corresponding BPW values."
+            echo "Error: Odd number of arguments. Each model must have corresponding BPW values (or empty string for no conversion)."
             exit 1
         fi
     done
@@ -146,7 +154,7 @@ process_model_list() {
 # Main execution
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <ModelName/Version> <BPW1,BPW2,BPW3...> [<ModelName/Version> <BPW1,BPW2,BPW3...> ...]"
-    echo "Example: $0 Qwen/QwQ-32B-preview 4.0,6.0,8.0 AnotherModel/ModelName 3.0,5.0"
+    echo "Example: $0 Qwen/QwQ-32B-preview 4.0,6.0,8.0 AnotherModel/ModelName ''"
     exit 1
 fi
 
