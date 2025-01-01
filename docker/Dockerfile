@@ -46,7 +46,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     /venv/bin/pip install -U --no-cache-dir "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install --no-cache-dir flash-attn --no-build-isolation && \
     /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars && \
-    /venv/bin/pip install --no-cache-dir .[extras]
+    cd /app/exllamav2 && /venv/bin/pip install --no-cache-dir .[extras] && cd /app
 
 # Install hfdownloader
 # Wget go for hfdownloader
