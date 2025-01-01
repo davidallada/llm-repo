@@ -179,8 +179,11 @@ load_embedding_model_configs() {
         fi
     done
 }
-load_model_configs()
-load_embedding_model_configs()
+
+load_model_configs
+
+load_embedding_model_configs
+
 # Start the TabbyAPI server
 cd /app/tabbyAPI
 ./start.sh --gpu-lib cu121
