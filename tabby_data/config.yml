@@ -188,7 +188,7 @@ embeddings:
   # Possible values: cpu, auto, cuda.
   # NOTE: It's recommended to load embedding models on the CPU.
   # If using an AMD GPU, set this value to 'cuda'.
-  embeddings_device: cpu
+  embeddings_device: gpu
 
   # An initial embedding model to load on the infinity backend.
   embedding_model_name: dunzhang_stella_en_1.5B_v5
