@@ -28,11 +28,20 @@
             "comment": "Daily Driver, Full context, fits in 2 GPU's -- with 6.0 haha"
         },
         {
-            "pretty_model_name": "Qwen2.5-Coder-32B-128k-context",
+            "pretty_model_name": "Qwen2.5-Coder-32B-100k-context",
             "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-4.0-bpw",
             "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
             "tabby_config": {
                 "max_seq_len": 100096
+            },
+            "comment": "Daily Driver, Full context, fits in 2 GPU's -- with 6.0 haha"
+        },
+        {
+            "pretty_model_name": "Qwen2.5-Coder-32B-128k-context",
+            "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-4.0-bpw",
+            "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 128000
             },
             "comment": "Daily Driver, Full context, fits in 2 GPU's -- with 6.0 haha"
         },
@@ -75,7 +84,15 @@
             },
             "comment": "QwQ Preview"
         },
-
+        {
+            "pretty_model_name": "homeassistant-llama-8b-4bpw-8k",
+            "model_name": "meta-llama_Llama-3.1-8B-Instruct-4.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 8192
+            },
+            "comment": "For homeassistant"
+        },
         {
             "pretty_model_name": "llama-8B-4bpw-fast-32k",
             "model_name": "meta-llama_Llama-3.1-8B-Instruct-4.0-bpw",
