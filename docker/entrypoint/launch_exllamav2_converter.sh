@@ -153,7 +153,7 @@ jq -c '.model_configs[]' "$config_file" | while read -r config; do
     done
 
     echo "Processing model: $model_name with BPW values: ${bpw_values[*]}"
-    process_model_config "$model_name" "${bpw_values[@]}"
+    process_model_config "$model_name" "${bpw_values[@]}" || true
 done
 
 echo "All models have been processed."
