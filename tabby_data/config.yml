@@ -72,7 +72,7 @@ model:
   # Names of args to use as a fallback for API load requests (default: []).
   # For example, if you always want cache_mode to be Q4 instead of on the inital model load, add "cache_mode" to this array.
   # Example: ['max_seq_len', 'cache_mode'].
-  use_as_default:
+  use_as_default: [ 'cache_mode' ]
 
   # Max sequence length (default: Empty).
   # Fetched from the model's base sequence length in config.json by default.
@@ -99,7 +99,7 @@ model:
   # Same as compress_pos_emb.
   # Use if the model was trained on long context with rope.
   # Leave blank to pull the value from the model.
-  rope_scale: 1.0
+  rope_scale:
 
   # Rope alpha (default: None).
   # Same as alpha_value. Set to "auto" to auto-calculate.
