@@ -107,6 +107,10 @@
         {
             "model_name": "allenai/OLMo-2-1124-7B-Instruct",
             "bpw": [4.0, 6.0, 8.0]
+        },
+        {
+            "model_name": "deepseek-ai/DeepSeek-V3",
+            "bpw": []
         }
     ]
 }
