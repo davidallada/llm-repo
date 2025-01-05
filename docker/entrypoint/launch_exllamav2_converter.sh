@@ -157,3 +157,6 @@ jq -c '.model_configs[]' "$config_file" | while read -r config; do
 done
 
 echo "All models have been processed."
+
+# Sleep for X seconds until next run, maybe 30 mins
+sleep 1800
