@@ -63,7 +63,11 @@ cleanup:
   stage: cleanup
   image: docker:latest
   services:
-  - docker:dind
+  - name: docker:dind
+    command: [ "--tls=false" ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   script:
   - docker system prune -af --volumes
   rules:
