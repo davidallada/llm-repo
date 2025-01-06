@@ -45,11 +45,13 @@ backup-to-nas:
     DOCKER_TLS_CERTDIR: ""
   before_script:
   - apk add --no-cache zip nfs-utils
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
   - mkdir -p ${NAS_MOUNT_POINT}
   - mount -t nfs 10.69.1.251:/volume1/container_registry ${NAS_MOUNT_POINT}
   - mkdir -p ${BACKUP_DIR}
   - zip -r ${BACKUP_DIR}/${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}.zip ${CI_PROJECT_DIR}
+  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}
   - docker save ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG} | gzip > ${BACKUP_DIR}/${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}_image.tar.gz
   - umount ${NAS_MOUNT_POINT}
   rules:
