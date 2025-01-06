@@ -2,6 +2,7 @@ stages:
 - build
 - deploy
 - backup
+- cleanup
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -48,3 +49,15 @@ backup-to-nas:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   needs:
   - job: docker-build
+
+cleanup:
+  stage: cleanup
+  image: docker:latest
+  services:
+  - docker:dind
+  script:
+  - docker system prune -af --volumes
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+  - job: backup-to-nas
