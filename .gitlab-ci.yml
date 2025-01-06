@@ -1,9 +1,12 @@
 stages:
 - build
 - deploy
+- backup
 
 variables:
   DOCKER_BUILDKIT: 1
+  NAS_MOUNT_POINT: /mnt/nas_backup
+  BACKUP_DIR: ${NAS_MOUNT_POINT}/container_registry
 
 docker-build:
   stage: build
@@ -13,15 +16,11 @@ docker-build:
   script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime --cache=true --cache-ttl=720h --cache-repo "${CI_REGISTRY_IMAGE}/cache" --build-arg BUILDKIT_INLINE_CACHE=1
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime
   rules:
   - if: $CI_COMMIT_BRANCH
     exists:
     - docker/Dockerfile
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-    - docker/.cache
 
 trigger-webhook:
   stage: deploy
@@ -33,3 +32,19 @@ trigger-webhook:
   needs:
   - job: docker-build
     artifacts: false
+
+backup-to-nas:
+  stage: backup
+  image: alpine:latest
+  script:
+  - apk add --no-cache zip nfs-utils
+  - mkdir -p ${NAS_MOUNT_POINT}
+  - mount -t nfs 10.69.1.251:/volume1/container_registry ${NAS_MOUNT_POINT}
+  - mkdir -p ${BACKUP_DIR}
+  - zip -r ${BACKUP_DIR}/${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}.zip ${CI_PROJECT_DIR}
+  - docker save ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG} | gzip > ${BACKUP_DIR}/${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}_image.tar.gz
+  - umount ${NAS_MOUNT_POINT}
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+  - job: docker-build

@@ -13,12 +13,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-# Create cache directories
-RUN mkdir -p /cache/apt /cache/pip
-
 # Install system dependencies
-RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     git \
@@ -43,13 +39,12 @@ RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
 # Install pip and packages within the virtual environment
-RUN --mount=type=cache,target=/root/.cache/pip \
-    /venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /venv/bin/pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
-    /venv/bin/pip install --no-cache-dir pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
-    /venv/bin/pip install -U --no-cache-dir "huggingface_hub[cli]" && \
-    MAX_JOBS=4 /venv/bin/pip install --no-cache-dir flash-attn --no-build-isolation && \
-    /venv/bin/pip install --no-cache-dir fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+    /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
+    /venv/bin/pip install -U "huggingface_hub[cli]" && \
+    MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
+    /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
 
 
 # Install hfdownloader
@@ -64,7 +59,7 @@ RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/Build
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip install --no-cache-dir .[extras]"
+    pip install .[extras]"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
