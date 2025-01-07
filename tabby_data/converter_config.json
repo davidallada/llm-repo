@@ -111,6 +111,10 @@
         {
             "model_name": "deepseek-ai/DeepSeek-V3",
             "bpw": []
-        }
+        },
+        {
+            "model_name": "openai/whisper-large-v3-turbo",
+            "bpw": []
+        },
     ]
 }

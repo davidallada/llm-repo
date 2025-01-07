@@ -137,6 +137,24 @@
                 "max_seq_len": 8192
             },
             "comment": "Big LLama"
+        },
+        {
+            "pretty_model_name": "Nemotron-70B",
+            "model_name": "nvidia_Llama-3.1-Nemotron-70B-Instruct-HF-4.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 8192
+            },
+            "comment": "Big LLama"
+        },
+        {
+            "pretty_model_name": "Nemotron-70B-draft",
+            "model_name": "nvidia_Llama-3.1-Nemotron-70B-Instruct-HF-4.0-bpw",
+            "draft_model": "meta-llama_Llama-3.2-1B-Instruct-4.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 8192
+            },
+            "comment": "Big LLama"
         }
     ],
     "embedding_configs": [
