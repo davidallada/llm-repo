@@ -119,6 +119,6 @@
         {
             "model_name": "openai/whisper-large-v3-turbo",
             "bpw": []
-        },
+        }
     ]
 }
