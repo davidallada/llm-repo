@@ -119,6 +119,10 @@
         {
             "model_name": "openai/whisper-large-v3-turbo",
             "bpw": []
+        },
+        {
+            "model_name": "hexgrad/Kokoro-TTS",
+            "bpw": []
         }
     ]
 }
