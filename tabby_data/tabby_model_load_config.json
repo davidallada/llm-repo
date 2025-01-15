@@ -157,8 +157,17 @@
             "comment": "Big LLama"
         },
         {
-            "pretty_model_name": "internlm3-8b-32k",
-            "model_name": "internlm_internlm3-8b-instruct-4.0-bpw-32k",
+            "pretty_model_name": "internlm3-8b-4.0bpw-32k",
+            "model_name": "internlm_internlm3-8b-instruct-4.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": "Intern LM"
+        },
+        {
+            "pretty_model_name": "internlm3-8b-8.0bpw-32k",
+            "model_name": "internlm_internlm3-8b-instruct-4.0-bpw",
             "draft_model": "",
             "tabby_config": {
                 "max_seq_len": 32768
