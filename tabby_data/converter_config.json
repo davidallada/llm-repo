@@ -1,6 +1,10 @@
 {
     "model_configs": [
         {
+            "model_name": "internlm/internlm3-8b-instruct",
+            "bpw": [4.0, 6.0, 8.0]
+        },
+        {
             "model_name": "PowerInfer/SmallThinker-3B-Preview",
             "bpw": [4.0, 6.0, 8.0]
         },
