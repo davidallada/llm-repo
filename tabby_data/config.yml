@@ -119,7 +119,7 @@ model:
   # A lower value reduces VRAM usage but decreases ingestion speed.
   # NOTE: Effects vary depending on the model.
   # An ideal value is between 512 and 4096.
-  chunk_size: 2048
+  chunk_size: 4096
 
   # Set the maximum number of prompts to process at one time (default: None/Automatic).
   # Automatically calculated if left blank.
