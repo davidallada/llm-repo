@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Trigger build
 # Activate the virtual environment
 source /venv/bin/activate
 
