@@ -32,6 +32,8 @@ trigger-webhook:
   - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    changes:
+    - docker/**
   needs:
   - job: docker-build
     artifacts: false
@@ -58,6 +60,8 @@ backup-to-nas:
   - umount ${NAS_MOUNT_POINT}
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    changes:
+    - docker/**
   needs:
   - job: docker-build
 
@@ -74,5 +78,7 @@ cleanup:
   - docker system prune -af --volumes
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    changes:
+    - docker/**
   needs:
   - job: backup-to-nas
