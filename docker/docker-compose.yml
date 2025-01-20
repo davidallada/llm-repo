@@ -10,30 +10,24 @@ services:
     image: gitlab-registry.rancher.devguy.dev/davidallada/llm-gpu-clone
     runtime: nvidia
     privileged: true # Required for mounting NFS
-    environment:
-      - NAME=TabbyAPI
-      - NVIDIA_VISIBLE_DEVICES=all
-      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
-      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
-      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
     volumes:
       - pip-cache:/cache/pip
       - apt-cache:/cache/apt
       - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-repo/model_directories:/app/model_directories
     command: exit
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: [ 0, 1 ]
-              capabilities: [gpu]
+
   tabbyapi:
     extends:
       service: tabbyapi-base
     container_name: tabbyapi-webserver
     restart: always
+    environment:
+      - NAME=TabbyAPI
+      - NVIDIA_VISIBLE_DEVICES=0,1
+      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
+      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
+      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
     ports:
       - "5000:5000"
       - "8076:8888"
@@ -52,13 +46,27 @@ services:
       - "5001:5000"
       - "8077:8888"
     command: converter
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: [ 2 ]
-              capabilities: [gpu]
+    environment:
+      - NAME=TabbyAPI
+      - NVIDIA_VISIBLE_DEVICES=0,1
+      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
+      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
+      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
+
+  tabbyapi-embeddings:
+    restart: always
+    extends:
+      service: tabbyapi-base
+    ports:
+      - "5002:5000"
+      - "8078:8888"
+    command: embeddings_only
+    environment:
+      - NAME=TabbyAPI
+      - NVIDIA_VISIBLE_DEVICES=2
+      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
+      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
+      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
 
 
 # curl http://10.69.1.169:5000/v1/model/load \
