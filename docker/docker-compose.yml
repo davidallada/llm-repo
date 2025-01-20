@@ -22,6 +22,13 @@ services:
       - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-repo/model_directories:/app/model_directories
     command: exit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ '0', '1' ]
+              capabilities: [gpu]
   tabbyapi:
     extends:
       service: tabbyapi-base
@@ -36,17 +43,6 @@ services:
       timeout: 10s
       retries: 3
     command: webserver
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              # count: all
-              capabilities: [gpu]
-              device_ids:
-                - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
-                - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
-                # - "GPU-fc0bf670-34e2-325e-ac6c-08cf5596565e"  # 3060
 
   tabbyapi-converter:
     restart: always
@@ -61,32 +57,8 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              # count: all
+              device_ids: [ '2' ]
               capabilities: [gpu]
-              device_ids:
-                - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
-                - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
-                # - "GPU-fc0bf670-34e2-325e-ac6c-08cf5596565e"  # 3060
-
-  tabbyapi-embeddings:
-    restart: always
-    extends:
-      service: tabbyapi-base
-    ports:
-      - "5002:5000"
-      - "8078:8888"
-    command: embeddings_only
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              # count: all
-              capabilities: [gpu]
-              device_ids:
-                # - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
-                # - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
-                - "GPU-fc0bf670-34e2-325e-ac6c-08cf5596565e"  # 3060
 
 
 # curl http://10.69.1.169:5000/v1/model/load \
