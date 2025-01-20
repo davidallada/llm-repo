@@ -42,7 +42,7 @@ services:
           devices:
             - driver: nvidia
               # count: all
-              capabilities: ["nvidia-compute"]
+              capabilities: [gpu]
               device_ids:
                 - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
                 - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
@@ -62,7 +62,7 @@ services:
           devices:
             - driver: nvidia
               # count: all
-              capabilities: ["nvidia-compute"]
+              capabilities: [gpu]
               device_ids:
                 - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
                 - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
@@ -82,7 +82,7 @@ services:
           devices:
             - driver: nvidia
               # count: all
-              capabilities: ["nvidia-compute"]
+              capabilities: [gpu]
               device_ids:
                 # - "GPU-2652c5d6-641a-fa93-418c-3e9afd215a34"  # 4090
                 # - "GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228"  # 4090
