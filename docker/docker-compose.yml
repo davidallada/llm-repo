@@ -10,6 +10,13 @@ services:
     image: gitlab-registry.rancher.devguy.dev/davidallada/llm-gpu-clone
     runtime: nvidia
     privileged: true # Required for mounting NFS
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: "nvidia"
+            capabilities: [ "gpu" ]
+            count: all
     volumes:
       - pip-cache:/cache/pip
       - apt-cache:/cache/apt
@@ -24,7 +31,7 @@ services:
     restart: always
     environment:
       - NAME=TabbyAPI
-      - NVIDIA_VISIBLE_DEVICES=0,1
+      - CUDA_VISIBLE_DEVICES=GPU-2652c5d6-641a-fa93-418c-3e9afd215a34,GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
@@ -48,7 +55,7 @@ services:
     command: converter
     environment:
       - NAME=TabbyAPI
-      - NVIDIA_VISIBLE_DEVICES=0,1
+      - CUDA_VISIBLE_DEVICES=GPU-2652c5d6-641a-fa93-418c-3e9afd215a34,GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
@@ -63,7 +70,7 @@ services:
     command: embeddings_only
     environment:
       - NAME=TabbyAPI
-      - NVIDIA_VISIBLE_DEVICES=2
+      - CUDA_VISIBLE_DEVICES=GPU-fc0bf670-34e2-325e-ac6c-08cf5596565e
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
