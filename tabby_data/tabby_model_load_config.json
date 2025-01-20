@@ -19,8 +19,8 @@
             "comment": "Daily Driver, Full context, fits in 2 GPU's"
         },
         {
-            "pretty_model_name": "Qwen2.5-Coder-32B-daily-6.5bpw-128k",
-            "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-6.5-bpw",
+            "pretty_model_name": "Qwen2.5-Coder-32B-daily-6.0bpw-128k",
+            "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-6.0-bpw",
             "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-4.0-bpw",
             "tabby_config": {
                 "max_seq_len": 128000
