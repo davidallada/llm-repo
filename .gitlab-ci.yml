@@ -25,6 +25,7 @@ docker-build:
     - docker/Dockerfile
     changes:
     - docker/**
+    - .gitlab-ci.yml
 
 trigger-webhook:
   stage: deploy
@@ -35,6 +36,7 @@ trigger-webhook:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     changes:
     - docker/**
+    - .gitlab-ci.yml
   needs:
   - job: docker-build
     artifacts: false
@@ -63,6 +65,7 @@ backup-to-nas:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     changes:
     - docker/**
+    - .gitlab-ci.yml
   needs:
   - job: docker-build
 
@@ -81,6 +84,7 @@ cleanup:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     changes:
     - docker/**
+    - .gitlab-ci.yml
   needs:
   - job: backup-to-nas
 
@@ -112,5 +116,6 @@ prune-registry:
     - docker/Dockerfile
     changes:
     - docker/**
+    - .gitlab-ci.yml
   needs:
   - job: cleanup
