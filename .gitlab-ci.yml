@@ -3,6 +3,7 @@ stages:
 - deploy
 - backup
 - cleanup
+- prune
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -82,3 +83,34 @@ cleanup:
     - docker/**
   needs:
   - job: backup-to-nas
+
+prune-registry:
+  stage: prune
+  image: docker:latest
+  services:
+  - name: docker:dind
+    command: [ "--tls=false" ]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+  - echo "Listing all images for $CI_REGISTRY_IMAGE..."
+  - docker images --format "{{.Repository}}:{{.Tag}}" --filter "reference=$CI_REGISTRY_IMAGE:*" | sort -r > all_images.txt
+  - echo "Retaining the latest 3 images..."
+  - head -n 3 all_images.txt > retained_images.txt
+  - echo "Images to retain:"
+  - cat retained_images.txt
+  - echo "Pruning images that are not in the retained list..."
+  - grep -Fxvf retained_images.txt all_images.txt | xargs -n 1 docker rmi
+  - echo "Pruning completed."
+  rules:
+  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  - if: '$CI_COMMIT_BRANCH'
+    exists:
+    - docker/Dockerfile
+    changes:
+    - docker/**
+  needs:
+  - job: cleanup
