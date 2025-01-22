@@ -25,7 +25,9 @@ docker-build:
         --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
         --destination "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" \
         --destination "${CI_REGISTRY_IMAGE}:latest" \
-        --target tabbyapi-exllamav2-builder-image-runtime
+        --target tabbyapi-exllamav2-builder-image-runtime \
+        --cache=true \
+        --cache-repo="${CI_REGISTRY_IMAGE}/cache"
   artifacts:
     paths:
       - VERSION
