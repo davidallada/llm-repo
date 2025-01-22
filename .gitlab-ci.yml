@@ -18,9 +18,9 @@ docker-build:
       NEW_VERSION="$MAJOR.$MINOR.$PATCH"
       echo "$NEW_VERSION" > VERSION
       export IMAGE_TAG="v$NEW_VERSION"
+    - echo "Building Docker image with tag: $IMAGE_TAG"
     - |
-      echo "Building Docker image with tag: $IMAGE_TAG"
-    - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" \
+      /kaniko/executor --context "${CI_PROJECT_DIR}/docker" \
         --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
         --destination "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" \
         --destination "${CI_REGISTRY_IMAGE}:latest" \
