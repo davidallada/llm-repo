@@ -1,9 +1,7 @@
 stages:
 - build
+- tag
 - deploy
-- backup
-- cleanup
-- prune
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -18,7 +16,36 @@ docker-build:
   script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime
+
+  # Read or set version
+  - |
+    if [ -f VERSION ]; then
+      CURRENT_VERSION=$(cat VERSION)
+    else
+      echo "0.0.0" > VERSION
+      CURRENT_VERSION="0.0.0"
+    fi
+
+    IFS="." read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+    PATCH=$((PATCH + 1))
+    NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+    echo $NEW_VERSION > VERSION
+    export IMAGE_TAG="v$NEW_VERSION"
+
+  # Print the new version
+  - echo "Building Docker image with tag: $IMAGE_TAG"
+
+  # Build and push the Docker image
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" \
+      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+      --destination "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" \
+      --destination "${CI_REGISTRY_IMAGE}:latest" \
+      --target tabbyapi-exllamav2-builder-image-runtime
+
+  artifacts:
+    paths:
+      - VERSION
+
   rules:
   - if: $CI_COMMIT_BRANCH
     exists:
@@ -27,6 +54,24 @@ docker-build:
     - docker/**
     - .gitlab-ci.yml
 
+create-tag:
+  stage: tag
+  image: alpine/git:latest
+  script:
+  - git config --global user.name "GitLab CI"
+  - git config --global user.email "ci@example.com"
+
+  # Create and push the Git tag
+  - NEW_VERSION=$(cat VERSION)
+  - git tag -a "v$NEW_VERSION" -m "Release version v$NEW_VERSION"
+  - git push origin "v$NEW_VERSION"
+
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+  - job: docker-build
+    artifacts: true
+
 trigger-webhook:
   stage: deploy
   image: curlimages/curl:latest
@@ -34,9 +79,6 @@ trigger-webhook:
   - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
   rules:
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    changes:
-    - docker/**
-    - .gitlab-ci.yml
   needs:
-  - job: docker-build
+  - job: create-tag
     artifacts: false
