@@ -1,40 +1,39 @@
+stages:
+- build
+- deploy
+
+variables:
+  DOCKER_BUILDKIT: 1
+  # NAS_MOUNT_POINT: /mnt/nas_backup
+  # BACKUP_DIR: ${NAS_MOUNT_POINT}/container_registry
+
 docker-build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - |
-      if [ -f VERSION ]; then
-        CURRENT_VERSION=$(cat VERSION)
-      else
-        echo "0.0.0" > VERSION
-        CURRENT_VERSION="0.0.0"
-      fi
-      IFS="." read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-      PATCH=$((PATCH + 1))
-      NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-      echo "$NEW_VERSION" > VERSION
-      export IMAGE_TAG="v$NEW_VERSION"
-    - | 
-      echo "Building Docker image with tag: $IMAGE_TAG"
-    - |
-      /kaniko/executor --context "${CI_PROJECT_DIR}/docker" \
-        --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
-        --destination "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" \
-        --destination "${CI_REGISTRY_IMAGE}:latest" \
-        --target tabbyapi-exllamav2-builder-image-runtime \
-        --cache=true \
-        --cache-repo="${CI_REGISTRY_IMAGE}/cache"
-  artifacts:
-    paths:
-      - VERSION
+  - mkdir -p /kaniko/.docker
+  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime
   rules:
-    - if: $CI_COMMIT_BRANCH
-      exists:
-        - docker/Dockerfile
-      changes:
-        - docker/**
-        - .gitlab-ci.yml
+  - if: $CI_COMMIT_BRANCH
+    exists:
+    - docker/Dockerfile
+    # changes:
+    # - docker/**
+    # - .gitlab-ci.yml
+
+trigger-webhook:
+  stage: deploy
+  image: curlimages/curl:latest
+  script:
+  - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
+  rules:
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # changes:
+    # - docker/**
+    # - .gitlab-ci.yml
+  needs:
+  - job: docker-build
+    artifacts: false
