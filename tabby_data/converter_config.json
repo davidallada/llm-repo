@@ -1,6 +1,18 @@
 {
     "model_configs": [
         {
+            "model_name": "Qwen/Qwen2.5-VL-72B-Instruct",
+            "bpw": [4.0, 4.5]
+        },
+        {
+            "model_name": "Qwen/Qwen2.5-VL-7B-Instruct",
+            "bpw": [4.0, 8.0]
+        },
+        {
+            "model_name": "Qwen/Qwen2.5-VL-3B-Instruct",
+            "bpw": [4.0, 8.0]
+        },
+        {
             "model_name": "internlm/internlm3-8b-instruct",
             "bpw": [4.0, 6.0, 8.0]
         },

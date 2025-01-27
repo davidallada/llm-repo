@@ -162,6 +162,15 @@
                 "max_seq_len": 32768
             },
             "comment": "Big deepseek"
+        },
+        {
+            "pretty_model_name": "Qwen2.5-VL-72B-Draft",
+            "model_name": "Qwen_Qwen2.5-VL-72B-Instruct-4.0-bpw",
+            "draft_model": "Qwen_Qwen2.5-VL-3B-Instruct-4.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 8192
+            },
+            "comment": "Big deepseek"
         }
     ],
     "embedding_configs": [
