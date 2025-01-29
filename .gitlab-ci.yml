@@ -4,36 +4,38 @@ stages:
 
 variables:
   DOCKER_BUILDKIT: 1
-  # NAS_MOUNT_POINT: /mnt/nas_backup
-  # BACKUP_DIR: ${NAS_MOUNT_POINT}/container_registry
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - /kaniko/cache
 
 docker-build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - mkdir -p /kaniko/cache
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
-  - mkdir -p /kaniko/.docker
-  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime
+    - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime --cache-dir /kaniko/cache
   rules:
-  - if: $CI_COMMIT_BRANCH
-    exists:
-    - docker/Dockerfile
-    # changes:
-    # - docker/**
-    # - .gitlab-ci.yml
+    - if: '$CI_COMMIT_BRANCH'
+      exists:
+        - docker/Dockerfile
+      changes:
+      - docker/**
+      - .gitlab-ci.yml
 
 trigger-webhook:
   stage: deploy
   image: curlimages/curl:latest
   script:
-  - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
+    - curl -X POST https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
   rules:
-  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    # changes:
-    # - docker/**
-    # - .gitlab-ci.yml
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   needs:
-  - job: docker-build
-    artifacts: false
+    - job: docker-build
+      artifacts: false
