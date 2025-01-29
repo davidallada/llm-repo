@@ -14,7 +14,7 @@ cache:
 test:
   stage: test
   script:
-    - sudo apt-get install curl
+    - apt-get install curl
     - curl -X POST https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
 
 docker-build:
