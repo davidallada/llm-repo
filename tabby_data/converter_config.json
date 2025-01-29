@@ -149,6 +149,14 @@
             "bpw": [4.0, 8.0]
         },
         {
+            "model_name": "Qwen/Qwen2.5-14B-Instruct-1M",
+            "bpw": [4.0]
+        },
+        {
+            "model_name": "Qwen/Qwen2.5-7B-Instruct-1M",
+            "bpw": [4.0]
+        },
+        {
             "model_name": "deepseek-ai/DeepSeek-V3",
             "bpw": []
         },
