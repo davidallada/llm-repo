@@ -42,7 +42,6 @@ docker-build:
 
 trigger-webhook:
   stage: deploy
-  image: curlimages/curl:latest
   script:
     - curl -X POST https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c
   rules:
