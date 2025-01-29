@@ -20,7 +20,15 @@ docker-build:
     - mkdir -p /kaniko/cache
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script:
-    - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}" --destination "${CI_REGISTRY_IMAGE}:latest" --target tabbyapi-exllamav2-builder-image-runtime --cache-dir /kaniko/cache
+    - VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
+    - |
+      echo "Building Docker image with version: $VERSION"
+    - /kaniko/executor --context "${CI_PROJECT_DIR}/docker" \
+        --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
+        --destination "${CI_REGISTRY_IMAGE}:latest" \
+        --target tabbyapi-exllamav2-builder-image-runtime \
+        --cache-dir /kaniko/cache
   rules:
     - if: '$CI_COMMIT_BRANCH'
       exists:
