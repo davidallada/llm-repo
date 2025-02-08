@@ -76,7 +76,7 @@ model:
 
   # Max sequence length (default: Empty).
   # Fetched from the model's base sequence length in config.json by default.
-  max_seq_len:
+  max_seq_len: 8122
 
   # Load model with tensor parallelism.
   # Falls back to autosplit if GPU split isn't provided.
