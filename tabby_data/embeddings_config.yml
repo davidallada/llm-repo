@@ -54,7 +54,7 @@ model:
   # Allow direct loading of models from a completion or chat completion request (default: False).
   # This method of loading is strict by default.
   # Enable dummy models to add exceptions for invalid model names.
-  inline_model_loading: false
+  inline_model_loading: true
 
   # Sends dummy model names when the models endpoint is queried. (default: False)
   # Enable this if the client is looking for specific OAI models.
