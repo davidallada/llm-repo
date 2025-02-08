@@ -134,7 +134,7 @@ model:
   prompt_template:
 
   # Enables vision support if the model supports it. (default: False)
-  vision: true
+  vision: false
 
   # Number of experts to use per token.
   # Fetched from the model's config.json if empty.
