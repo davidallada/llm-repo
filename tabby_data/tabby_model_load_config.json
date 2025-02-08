@@ -10,15 +10,6 @@
             "comment": "1m 14b"
         },
         {
-            "pretty_model_name": "Qwen 2.5 7B 400k",
-            "model_name": "Qwen_Qwen2.5-7B-Instruct-1M-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 409600
-            },
-            "comment": "1m 14b"
-        },
-        {
             "pretty_model_name": "Qwen 2.5 7B 1M",
             "model_name": "Qwen_Qwen2.5-7B-Instruct-1M-4.0-bpw",
             "draft_model": "",
@@ -52,7 +43,7 @@
             "tabby_config": {
                 "max_seq_len": 16384
             },
-            "comment": "Qwen 2.5 72B fits in two GPU's with 12k context"
+            "comment": "Qwen 2.5 72B fits in two GPU's with 16k context"
         },
 
         {
@@ -137,47 +128,11 @@
             "comment": "Big LLama"
         },
         {
-            "pretty_model_name": "internlm3-8b-4.0bpw-32k",
-            "model_name": "internlm_internlm3-8b-instruct-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": "Intern LM"
-        },
-        {
-            "pretty_model_name": "internlm3-8b-8.0bpw-32k",
-            "model_name": "internlm_internlm3-8b-instruct-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": "Intern LM"
-        },
-        {
-            "pretty_model_name": "Nemotron-70B-draft-4.5bpw",
-            "model_name": "nvidia_Llama-3.1-Nemotron-70B-Instruct-HF-4.5-bpw",
-            "draft_model": "meta-llama_Llama-3.2-1B-Instruct-4.0-bpw",
-            "tabby_config": {
-                "max_seq_len": 12288
-            },
-            "comment": "Big nemotron 4.5"
-        },
-        {
-            "pretty_model_name": "R1-Distill-Llama-70B-4bpw",
-            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Llama-70B-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 8192
-            },
-            "comment": "Big deepseek"
-        },
-        {
             "pretty_model_name": "R1-Distill-Llama-70B-4bpw-draft",
             "model_name": "deepseek-ai_DeepSeek-R1-Distill-Llama-70B-4.0-bpw",
             "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Llama-8B-4.0-bpw",
             "tabby_config": {
-                "max_seq_len": 8192
+                "max_seq_len": 12288
             },
             "comment": "Big deepseek"
         },
