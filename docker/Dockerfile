@@ -4,27 +4,30 @@ ARG VERSION=debug
 
 # Stage 1: Build environment
 FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
-
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
-    # PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
-    # LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     git \
     wget \
     software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
-    && apt-get install -y python3.12 python3.12-venv python3.12-dev \
-    && apt-get install -y ninja-build \
+    && apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone necessary repositories
@@ -49,11 +52,15 @@ RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
 
 # Install hfdownloader
 # Wget go for hfdownloader
-RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
+    rm -rf go1.21.6.linux-amd64.tar.gz
 ENV PATH="$PATH:/usr/local/go/bin"
-RUN cd /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
+RUN cd /app/HuggingFaceModelDownloader && \
+    /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
-    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
+    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && \
+    rm -rf /app/HuggingFaceModelDownloader && \
+    cd /app
 
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
@@ -63,22 +70,22 @@ RUN /bin/bash -c "source /venv/bin/activate && \
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
-
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
-    # PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
-    # LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install runtime dependencies including Python 3.12
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && apt-get update && \
+    apt-get install -y --no-install-recommends \
     python3.12 \
     python3.12-venv \
     python3.12-dev \
@@ -116,7 +123,7 @@ RUN chmod +x /app/entrypoint/*.sh
 # Expose ports for Jupyter Lab and exllamav2
 EXPOSE 8888 5000
 
-# Add LABELs near the end of your Dockerfile
+# Add LABELs
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
 LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
