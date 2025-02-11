@@ -1,45 +1,17 @@
 stages:
-- build-base
-- build-runtime
+- build
 - deploy
 
 variables:
   DOCKER_BUILDKIT: 1
+
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
   - /kaniko/cache
 
 docker-build:
-  stage: build-base
-  image:
-    name: gcr.io/kaniko-project/executor:v1.23.2-debug
-    entrypoint: [ "" ]
-  before_script:
-  - mkdir -p /kaniko/.docker
-  - mkdir -p /kaniko/cache
-  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  script:
-  - VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
-  - |
-    echo "Building Docker image with version: $VERSION"
-  - |
-    /kaniko/executor \
-      --context "${CI_PROJECT_DIR}/docker" \
-      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
-      --destination "${CI_REGISTRY_IMAGE}:builder-${VERSION}" \
-      --destination "${CI_REGISTRY_IMAGE}:builder-latest" \
-      --target tabbyapi-exllamav2-builder-image
-  rules:
-  - if: '$CI_COMMIT_BRANCH'
-    exists:
-    - docker/Dockerfile
-    changes:
-    - docker/**
-    - .gitlab-ci.yml
-
-docker-build-runtime:
-  stage: build-runtime
+  stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
@@ -58,6 +30,8 @@ docker-build-runtime:
       --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
       --destination "${CI_REGISTRY_IMAGE}:latest" \
       --target tabbyapi-exllamav2-builder-image-runtime
+      # --cache-dir /kaniko/cache \
+
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
@@ -70,8 +44,9 @@ trigger-webhook:
   stage: deploy
   script:
   - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
+
   rules:
   - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   needs:
-  - job: docker-build-runtime
+  - job: docker-build
     artifacts: false
