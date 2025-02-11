@@ -21,6 +21,7 @@ docker-build:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
+    echo "Using cache repository: $CACHE_REPO"
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"  # Move VERSION declaration here
     echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
