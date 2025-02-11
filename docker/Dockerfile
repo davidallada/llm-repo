@@ -11,8 +11,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
-    PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
-    LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+    # PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
+    # LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -69,9 +69,9 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    VERSION=${VERSION} \
-    PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
-    LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+    VERSION=${VERSION}
+    # PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
+    # LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install runtime dependencies including Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
