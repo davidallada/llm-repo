@@ -21,9 +21,8 @@ docker-build:
   before_script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-  script:
-  - echo "Building Docker image with version: $VERSION"
-  - |
+  script: |
+    echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
       --context "${CI_PROJECT_DIR}/docker" \
       --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
