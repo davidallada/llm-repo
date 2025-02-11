@@ -4,7 +4,7 @@
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
@@ -40,7 +40,7 @@ ENV PATH="/venv/bin:$PATH"
 
 # Install pip and packages within the virtual environment
 RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
     /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
     /venv/bin/pip install -U "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
@@ -58,11 +58,11 @@ RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/Build
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
+    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu124 && \
     pip install .[extras]"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
