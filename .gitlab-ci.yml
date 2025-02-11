@@ -29,12 +29,9 @@ docker-build:
         --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
         --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
         --destination "${CI_REGISTRY_IMAGE}:latest" \
-        --target tabbyapi-exllamav2-builder-image-runtime \
-        --cache-dir /kaniko/cache \
-        --snapshotMode=redo \
-        --registry-mirror=gitlab-registry.rancher.devguy.dev \
-        --cleanup \
-        --max-concurrent-uploads=1
+        --target tabbyapi-exllamav2-builder-image-runtime
+        # --cache-dir /kaniko/cache \
+
   rules:
     - if: '$CI_COMMIT_BRANCH'
       exists:
