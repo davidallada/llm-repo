@@ -3,7 +3,7 @@
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
@@ -62,7 +62,7 @@ RUN /bin/bash -c "source /venv/bin/activate && \
     pip install .[extras]"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
