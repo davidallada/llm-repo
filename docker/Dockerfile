@@ -42,31 +42,34 @@ RUN python3.12 -m venv /venv
 RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
-# Install pip and packages within the virtual environment
-RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
-    /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
-    /venv/bin/pip install -U "huggingface_hub[cli]" && \
-    MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
-    /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+# Install pip and packages within the virtual environment with --no-cache-dir to avoid caching
+RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
+    /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress --no-cache-dir && \
+    /venv/bin/pip install -U "huggingface_hub[cli]" --no-cache-dir && \
+    MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir && \
+    /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars --no-cache-dir
 
 # Install hfdownloader
 # Wget go for hfdownloader
-RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
-    rm -rf go1.21.6.linux-amd64.tar.gz
+RUN wget -q -O go1.21.6.linux-amd64.tar.gz https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
+    rm go1.21.6.linux-amd64.tar.gz
+
 ENV PATH="$PATH:/usr/local/go/bin"
+
+# Build hfdownloader
 RUN cd /app/HuggingFaceModelDownloader && \
     /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
     mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && \
-    rm -rf /app/HuggingFaceModelDownloader && \
-    cd /app
+    rm -rf /app/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader/output
 
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip install .[extras]"
+    pip install .[extras] --no-cache-dir"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
