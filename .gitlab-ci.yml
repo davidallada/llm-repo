@@ -18,11 +18,6 @@ docker-build:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
-  resources:
-    requests:
-      memory: 15Gi # Requesting 15GB to ensure job scheduling with enough memory
-    limits:
-      memory: 20Gi # Capping memory usage at 20GB
   before_script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
