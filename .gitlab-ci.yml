@@ -4,6 +4,7 @@ stages:
 
 variables:
   DOCKER_BUILDKIT: 1
+  JAVA_TOOL_OPTIONS: "-Xmx16g" # Limit Kaniko's Java heap usage to 16GB, leaving 4GB for other processes
   VERSION: "v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
   CACHE_REPO: "$CI_REGISTRY_IMAGE/cache"
 
@@ -17,6 +18,11 @@ docker-build:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
+  resources:
+    requests:
+      memory: 15Gi # Requesting 15GB to ensure job scheduling with enough memory
+    limits:
+      memory: 20Gi # Capping memory usage at 20GB
   before_script:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
@@ -31,7 +37,8 @@ docker-build:
       --target tabbyapi-exllamav2-builder-image-runtime \
       --cache=true \
       --cache-repo=$CACHE_REPO \
-      --cache-copy-layers
+      --cache-copy-layers \
+      --snapshotMode=redo
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
