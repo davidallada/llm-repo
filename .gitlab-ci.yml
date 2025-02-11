@@ -1,16 +1,14 @@
 stages:
-- build
-- deploy
+  - build
+  - deploy
 
 variables:
   DOCKER_BUILDKIT: 1
-  JAVA_TOOL_OPTIONS: "-Xmx16g" # Limit Kaniko's Java heap usage to 16GB, leaving 4GB for other processes
-  CACHE_REPO: "$CI_REGISTRY_IMAGE/cache"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - /kaniko/cache
+    - /cache/kaniko  # Mount the PVC cache for Kaniko
 
 docker-build:
   stage: build
@@ -18,36 +16,26 @@ docker-build:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   before_script:
-  - mkdir -p /kaniko/.docker
-  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
-    echo "Using cache repository: $CACHE_REPO"
-    VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"  # Move VERSION declaration here
+    VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
     echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
-      --context "${CI_PROJECT_DIR}/docker" \
-      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
-      --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
-      --destination "${CI_REGISTRY_IMAGE}:latest" \
-      --target tabbyapi-exllamav2-builder-image-runtime \
-      --cache=true \
-      --cache-repo=$CACHE_REPO \
-      --cache-copy-layers \
-      --snapshot-mode=redo
+        --context "${CI_PROJECT_DIR}/docker" \
+        --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
+        --destination "${CI_REGISTRY_IMAGE}:latest" \
+        --target tabbyapi-exllamav2-builder-image-runtime \
+        --cache=true \
+        --cache-repo="$CI_REGISTRY/$CI_PROJECT_NAMESPACE/cache"  # Cache repo in GitLab registry
+        --cache-dir=/kaniko/cache  # Kaniko uses this to cache layers
+        --cache-copy-layers \
+        --snapshotMode=redo
   rules:
-  - if: '$CI_COMMIT_BRANCH'
-    exists:
-    - docker/Dockerfile
-    changes:
-    - docker/**
-    - .gitlab-ci.yml
-
-trigger-webhook:
-  stage: deploy
-  script:
-  - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
-  rules:
-  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-  needs:
-  - job: docker-build
-    artifacts: false
+    - if: '$CI_COMMIT_BRANCH'
+      exists:
+        - docker/Dockerfile
+      changes:
+        - docker/**
+        - .gitlab-ci.yml
