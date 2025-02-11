@@ -3,7 +3,7 @@
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.1.1-cudnn-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
@@ -11,8 +11,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION} \
-    PATH="/usr/local/cuda-12.4/bin:/usr/local/cuda/bin:${PATH}" \
-    LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+    PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
+    LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -41,7 +41,7 @@ ENV PATH="/venv/bin:$PATH"
 
 # Install pip and packages within the virtual environment
 RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
     /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
     /venv/bin/pip install -U "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
@@ -58,11 +58,11 @@ RUN cd /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildL
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu124 && \
+    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
     pip install .[extras]"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.1.1-cudnn-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
@@ -70,8 +70,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION} \
-    PATH="/usr/local/cuda-12.4/bin:/usr/local/cuda/bin:${PATH}" \
-    LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+    PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
+    LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install runtime dependencies including Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
