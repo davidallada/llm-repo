@@ -5,7 +5,6 @@ stages:
 variables:
   DOCKER_BUILDKIT: 1
   JAVA_TOOL_OPTIONS: "-Xmx16g" # Limit Kaniko's Java heap usage to 16GB, leaving 4GB for other processes
-  VERSION: "v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
   CACHE_REPO: "$CI_REGISTRY_IMAGE/cache"
 
 cache:
@@ -22,6 +21,7 @@ docker-build:
   - mkdir -p /kaniko/.docker
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
+    VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"  # Move VERSION declaration here
     echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
       --context "${CI_PROJECT_DIR}/docker" \
