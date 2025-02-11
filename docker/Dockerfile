@@ -3,14 +3,14 @@
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.1.1-cudnn-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    VERSION=${VERSION} \
+    VERSION=${VERSION}
     PATH="/usr/local/cuda-12.1/bin:/usr/local/cuda/bin:${PATH}" \
     LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
@@ -62,7 +62,7 @@ RUN /bin/bash -c "source /venv/bin/activate && \
     pip install .[extras]"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.1.1-cudnn-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
