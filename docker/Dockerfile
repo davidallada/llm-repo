@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1.4
-
 # Set a default value for VERSION
 ARG VERSION=debug
 
@@ -11,7 +10,9 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    VERSION=${VERSION}
+    VERSION=${VERSION} \
+    PATH="/usr/local/cuda-12.4/bin:/usr/local/cuda/bin:${PATH}" \
+    LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -46,12 +47,11 @@ RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
     /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
 
-
 # Install hfdownloader
 # Wget go for hfdownloader
 RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
 ENV PATH="$PATH:/usr/local/go/bin"
-RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
+RUN cd /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
     mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
 
@@ -69,7 +69,9 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    VERSION=${VERSION}
+    VERSION=${VERSION} \
+    PATH="/usr/local/cuda-12.4/bin:/usr/local/cuda/bin:${PATH}" \
+    LD_LIBRARY_PATH="/usr/local/cuda-12.4/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Install runtime dependencies including Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -101,7 +103,6 @@ COPY --from=tabbyapi-exllamav2-builder-image /usr/local/bin/hfdownloader /usr/lo
 
 # Create symlink for consistency
 RUN ln -s /venv /app/tabbyAPI/venv
-
 ENV PATH="/venv/bin:$PATH"
 
 # Create necessary directories
@@ -110,7 +111,6 @@ RUN mkdir -p /mnt/exllamav2/{gguf,exl2} /mnt/converter /mnt/temp/{download,gguf,
 WORKDIR /app
 
 COPY entrypoint /app/entrypoint
-
 RUN chmod +x /app/entrypoint/*.sh
 
 # Expose ports for Jupyter Lab and exllamav2
