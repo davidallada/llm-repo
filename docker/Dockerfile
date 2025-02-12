@@ -19,7 +19,7 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
@@ -46,17 +46,18 @@ RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
 # Install pip3 and packages within the virtual environment
-RUN /venv/bin/pip3 install --upgrade pip3 setuptools wheel
+RUN /venv/bin/pip3 install --upgrade pip setuptools wheel
+
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
     pip3 install .[extras,cu121]"
 
-RUN /venv/bin/pip3 install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
-    /venv/bin/pip3 install -U "huggingface_hub[cli]" && \
-    MAX_JOBS=4 /venv/bin/pip3 install flash-attn --no-build-isolation && \
-    /venv/bin/pip3 install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+# RUN /venv/bin/pip3 install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
+#     /venv/bin/pip3 install -U "huggingface_hub[cli]" && \
+#     MAX_JOBS=4 /venv/bin/pip3 install flash-attn --no-build-isolation && \
+#     /venv/bin/pip3 install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
 
 
 # Install hfdownloader
@@ -66,12 +67,6 @@ ENV PATH="$PATH:/usr/local/go/bin"
 RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
     mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
-
-# Install tabbyAPI dependencies
-RUN /bin/bash -c "source /venv/bin/activate && \
-    cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip3 install .[extras,cu121]"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.4.1-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
@@ -88,7 +83,7 @@ RUN chmod 1777 /tmp
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
@@ -105,7 +100,8 @@ RUN apt-get update && \
     vim \
     curl \
     jq \
-    ninja-build && \
+    ninja-build \
+    apt-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
