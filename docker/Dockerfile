@@ -36,11 +36,12 @@ RUN git clone --depth 1 https://github.com/turboderp/exllamav2 /app/exllamav2 &&
 # Create virtual environment in /venv
 RUN python3.12 -m venv /venv
 RUN ln -s /venv /app/tabbyAPI/venv
-ENV PATH="/venv/bin:$PATH"
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONPATH="/venv/lib/python3.12/site-packages:$PYTHONPATH"
 
 # Install pip and packages within the virtual environment
 RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+    /venv/bin/pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 && \
     /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
     /venv/bin/pip install -U "huggingface_hub[cli]" && \
     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
@@ -92,6 +93,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && update-alternatives --set python3 /usr/bin/python3.12
 
+
+RUN python3.12 -m venv /venv
+
 # Copy only necessary files from tabbyapi-exllamav2-builder-image
 COPY --from=tabbyapi-exllamav2-builder-image /venv /venv
 COPY --from=tabbyapi-exllamav2-builder-image /app/exllamav2 /app/exllamav2
@@ -102,7 +106,8 @@ COPY --from=tabbyapi-exllamav2-builder-image /usr/local/bin/hfdownloader /usr/lo
 # Create symlink for consistency
 RUN ln -s /venv /app/tabbyAPI/venv
 
-ENV PATH="/venv/bin:$PATH"
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONPATH="/venv/lib/python3.12/site-packages:$PYTHONPATH"
 
 # Create necessary directories
 RUN mkdir -p /mnt/exllamav2/{gguf,exl2} /mnt/converter /mnt/temp/{download,gguf,exl2,temp} /app/tabby_data /app/model_directories/{base_models,models,draft_models,embedding_models,loras}
