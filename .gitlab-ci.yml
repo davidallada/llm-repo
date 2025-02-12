@@ -8,7 +8,8 @@ variables:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - .cache/kaniko # Changed from /cache/kaniko to .cache/kaniko
+  - .cache/kaniko
+  policy: pull-push
 
 docker-build:
   stage: build
@@ -32,7 +33,16 @@ docker-build:
       --cache-dir=/cache \
       --cache-copy-layers \
       --snapshotMode=redo \
-      --compressed-caching=false
+      --compressed-caching=false \
+      --use-new-run \
+      --snapshot-mode=redo \
+      --ignore-path=/root/.cache \
+      --ignore-path=/tmp \
+      --ignore-path=**/*.pyc \
+      --ignore-path=**/__pycache__ \
+      --ignore-path=**/.pytest_cache \
+      --parallel \
+      --cleanup
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
