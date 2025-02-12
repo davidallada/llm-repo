@@ -31,7 +31,8 @@ docker-build:
         --cache-repo="$CI_REGISTRY/$CI_PROJECT_NAMESPACE/cache"  # Cache repo in GitLab registry
         --cache-dir=/kaniko/cache  # Kaniko uses this to cache layers
         --cache-copy-layers \
-        --snapshotMode=redo
+        --snapshotMode=redo \
+        --compressed-caching=false
   rules:
     - if: '$CI_COMMIT_BRANCH'
       exists:
