@@ -32,7 +32,6 @@ docker-build:
       --cache-repo="${CI_REGISTRY_IMAGE}/cache" \
       --cache-dir=/cache \
       --cache-copy-layers \
-      --snapshotMode=redo \
       --compressed-caching=false \
       --use-new-run \
       --snapshot-mode=redo \
@@ -41,7 +40,6 @@ docker-build:
       --ignore-path=**/*.pyc \
       --ignore-path=**/__pycache__ \
       --ignore-path=**/.pytest_cache \
-      --parallel \
       --cleanup
   rules:
   - if: '$CI_COMMIT_BRANCH'
