@@ -13,13 +13,11 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-RUN mkdir -p /tmp
-RUN chmod 1777 /tmp
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
+RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
+    apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
@@ -46,32 +44,31 @@ RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
 # Install pip3 and packages within the virtual environment
-RUN /venv/bin/pip3 install --upgrade pip3 setuptools wheel
+RUN /venv/bin/pip3 install --upgrade pip setuptools wheel
+
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
     pip3 install .[extras,cu121]"
 
-RUN /venv/bin/pip3 install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
-    /venv/bin/pip3 install -U "huggingface_hub[cli]" && \
-    MAX_JOBS=4 /venv/bin/pip3 install flash-attn --no-build-isolation && \
-    /venv/bin/pip3 install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+# RUN /venv/bin/pip3 install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
+#     /venv/bin/pip3 install -U "huggingface_hub[cli]" && \
+#     MAX_JOBS=4 /venv/bin/pip3 install flash-attn --no-build-isolation && \
+#     /venv/bin/pip3 install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
 
 
 # Install hfdownloader
 # Wget go for hfdownloader
 RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
 ENV PATH="$PATH:/usr/local/go/bin"
-RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
-    chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
-    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
+RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
+    cd /app/HuggingFaceModelDownloader && \
+    /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec chmod +x {} \; && \
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec mv {} /usr/local/bin/hfdownloader \; && \
+    rm -rf /app/HuggingFaceModelDownloader
 
-# Install tabbyAPI dependencies
-RUN /bin/bash -c "source /venv/bin/activate && \
-    cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip3 install .[extras,cu121]"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.4.1-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
@@ -83,12 +80,11 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-RUN mkdir -p /tmp
-RUN chmod 1777 /tmp
 WORKDIR /app
+RUN mkdir -p /tmp && chmod 1777 /tmp
 
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
@@ -105,7 +101,8 @@ RUN apt-get update && \
     vim \
     curl \
     jq \
-    ninja-build && \
+    ninja-build \
+    apt-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -127,6 +124,8 @@ COPY --from=tabbyapi-exllamav2-builder-image /usr/local/bin/hfdownloader /usr/lo
 RUN ln -s /venv /app/tabbyAPI/venv
 
 ENV PATH="/venv/bin:$PATH"
+
+RUN /venv/bin/pip3 install --upgrade pip setuptools wheel
 
 # Create necessary directories
 RUN mkdir -p /mnt/exllamav2/{gguf,exl2} /mnt/converter /mnt/temp/{download,gguf,exl2,temp} /app/tabby_data /app/model_directories/{base_models,models,draft_models,embedding_models,loras}
