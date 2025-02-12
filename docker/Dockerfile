@@ -62,9 +62,13 @@ RUN /bin/bash -c "source /venv/bin/activate && \
 # Wget go for hfdownloader
 RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
 ENV PATH="$PATH:/usr/local/go/bin"
-RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
-    chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
-    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
+RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
+    cd /app/HuggingFaceModelDownloader && \
+    /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec chmod +x {} \; && \
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec mv {} /usr/local/bin/hfdownloader \; && \
+    rm -rf /app/HuggingFaceModelDownloader
+
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.4.1-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
