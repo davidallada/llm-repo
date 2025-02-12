@@ -21,7 +21,6 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
-    apt-tools \
     build-essential \
     curl \
     git \
@@ -79,12 +78,13 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
+RUN mkdir -p /tmp && chmod 1777 /tmp
+
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y \
-    apt-tools \
     build-essential \
     curl \
     git \
