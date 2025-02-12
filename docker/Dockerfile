@@ -50,7 +50,7 @@ ENV PATH="/venv/bin:$PATH"
 #     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir && \
 #     /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars --no-cache-dir
 
-RUN /venv/bin/pip install --upgrade pip setuptools wheel \
+RUN /venv/bin/pip install --upgrade pip setuptools wheel && /venv/bin/pip install \
     torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir \
     pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress \
     "huggingface_hub[cli]" flash-attn --no-build-isolation --no-cache-dir \
