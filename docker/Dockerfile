@@ -14,6 +14,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 RUN mkdir -p /tmp && chmod 1777 /tmp
+WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && \
@@ -33,7 +34,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone necessary repositories
-WORKDIR /app
 RUN git clone --depth 1 https://github.com/turboderp/exllamav2 /app/exllamav2 && \
     git clone --depth 1 https://github.com/theroyallab/tabbyAPI /app/tabbyAPI && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
@@ -79,6 +79,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 RUN mkdir -p /tmp && chmod 1777 /tmp
+WORKDIR /app
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
