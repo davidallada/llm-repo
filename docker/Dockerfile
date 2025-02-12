@@ -53,18 +53,20 @@ RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
 
 # Install hfdownloader
 # Wget go for hfdownloader
-RUN wget -q -O go1.21.6.linux-amd64.tar.gz https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && \
+RUN mkdir -p /tmp && \
+    wget -q -O go1.21.6.linux-amd64.tar.gz https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
     rm go1.21.6.linux-amd64.tar.gz
 
 ENV PATH="$PATH:/usr/local/go/bin"
 
 # Build hfdownloader
-RUN cd /app/HuggingFaceModelDownloader && \
+RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
+    cd /app/HuggingFaceModelDownloader && \
     /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
-    chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
-    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && \
-    rm -rf /app/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader/output
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec chmod +x {} \; && \
+    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec mv {} /usr/local/bin/hfdownloader \; && \
+    rm -rf /app/HuggingFaceModelDownloader
 
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
