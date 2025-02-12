@@ -116,7 +116,11 @@ COPY --from=tabbyapi-exllamav2-builder-image /app/exui /app/exui
 COPY --from=tabbyapi-exllamav2-builder-image /usr/local/bin/hfdownloader /usr/local/bin/hfdownloader
 
 # Create symlink for consistency
-RUN ln -s /venv /app/tabbyAPI/venv
+# Ensure Python points to the virtual environment's Python
+RUN ln -sf /venv/bin/python /usr/bin/python && \
+    ln -sf /venv/bin/python3 /usr/bin/python3 && \
+    ln -s /venv /app/tabbyAPI/venv
+
 ENV PATH="/venv/bin:$PATH"
 
 # Create necessary directories
