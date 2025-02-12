@@ -3,7 +3,7 @@
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
@@ -44,7 +44,8 @@ ENV PATH="/venv/bin:$PATH"
 
 # Install pip and packages within the virtual environment with --no-cache-dir to avoid caching
 RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
-    /venv/bin/pip install torch==2.1.2+cu121 torchvision==0.16.2+cu121 torchaudio==2.1.2+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
+    # /venv/bin/pip install torch==2.1.2+cu121 torchvision==0.16.2+cu121 torchaudio==2.1.2+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --no-cache-dir && \
     /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress --no-cache-dir && \
     /venv/bin/pip install -U "huggingface_hub[cli]" --no-cache-dir && \
     /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir && \
@@ -71,11 +72,11 @@ RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
-    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
+    /app/tabbyAPI/start.sh --update-deps --gpu-lib cu124 && \
     pip install .[extras] --no-cache-dir && pip cache purge"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
