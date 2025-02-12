@@ -14,17 +14,21 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    apt-tools \
     build-essential \
     curl \
     git \
     wget \
-    software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
-    && apt-get install -y python3.12 python3.12-venv python3.12-dev \
-    && apt-get install -y ninja-build \
-    && rm -rf /var/lib/apt/lists/*
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    ninja-build && \
+    rm -rf /var/lib/apt/lists/*
 
 # Clone necessary repositories
 WORKDIR /app
@@ -72,12 +76,16 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-# Install runtime dependencies including Python 3.12
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    apt-tools \
+    build-essential \
+    curl \
+    git \
+    wget \
     python3.12 \
     python3.12-venv \
     python3.12-dev \
@@ -87,7 +95,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     curl \
     jq \
-    && rm -rf /var/lib/apt/lists/*
+    ninja-build && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.12 as the default Python version
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
@@ -125,7 +134,7 @@ EXPOSE 8888 5000
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
 LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
-LABEL org.opencontainers.image.source="https://github.com/yourusername/yourrepository"
+LABEL org.opencontainers.image.source="https://gitlab.rancher.devguy.dev/davidallada/llm-gpu-clone"
 
 # Set the entrypoint to activate the virtual environment and then execute the command
 ENTRYPOINT ["/app/entrypoint/entrypoint.sh"]
