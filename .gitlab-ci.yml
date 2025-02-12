@@ -22,17 +22,17 @@ docker-build:
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
     echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
-        --context "${CI_PROJECT_DIR}/docker" \
-        --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
-        --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
-        --destination "${CI_REGISTRY_IMAGE}:latest" \
-        --target tabbyapi-exllamav2-builder-image-runtime \
-        --cache=true \
-        --cache-repo="${CI_REGISTRY_IMAGE}/cache" \  # Changed to use project's registry
-        --cache-dir=/cache \  # Changed to match cache path
-        --cache-copy-layers \
-        --snapshotMode=redo \
-        --compressed-caching=false
+      --context "${CI_PROJECT_DIR}/docker" \
+      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+      --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
+      --destination "${CI_REGISTRY_IMAGE}:latest" \
+      --target tabbyapi-exllamav2-builder-image-runtime \
+      --cache=true \
+      --cache-repo="${CI_REGISTRY_IMAGE}/cache" \
+      --cache-dir=/cache \
+      --cache-copy-layers \
+      --snapshotMode=redo \
+      --compressed-caching=false
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
