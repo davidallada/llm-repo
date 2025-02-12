@@ -47,8 +47,7 @@ docker-build:
       --ignore-path=**/.pytest_cache \
       --ignore-path=/cache/pip/* \
       --ignore-path=/cache/apt/* \
-      --cleanup \
-      --push-retry
+      --cleanup
   variables:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
