@@ -69,7 +69,7 @@ RUN cd /app/HuggingFaceModelDownloader && \
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip install .[extras] --no-cache-dir"
+    pip install .[extras] --no-cache-dir && pip cache purge"
 
 # Stage 2: Runtime environment
 FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
