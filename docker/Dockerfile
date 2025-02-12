@@ -64,6 +64,7 @@ RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf
 ENV PATH="$PATH:/usr/local/go/bin"
 RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
     cd /app/HuggingFaceModelDownloader && \
+    chmod +x /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
     find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec chmod +x {} \; && \
     find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec mv {} /usr/local/bin/hfdownloader \; && \
