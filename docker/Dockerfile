@@ -14,7 +14,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 # Install system dependencies
-RUN apt-get update && \
+RUN mkdir -p /tmp && \
+    apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
@@ -28,6 +29,7 @@ RUN apt-get update && \
     python3.12-venv \
     python3.12-dev \
     ninja-build && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone necessary repositories
@@ -96,6 +98,7 @@ RUN apt-get update && \
     curl \
     jq \
     ninja-build && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.12 as the default Python version
