@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1.4
+
 # Set a default value for VERSION
 ARG VERSION=debug
 
 # Stage 1: Build environment
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
+FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 AS tabbyapi-exllamav2-builder-image
+
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
@@ -12,22 +14,16 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 # Install system dependencies
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     git \
     wget \
     software-properties-common \
-    && add-apt-repository 'ppa:deadsnakes/ppa' \
-    && apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
-    ninja-build \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y python3.12 python3.12-venv python3.12-dev \
+    && apt-get install -y ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone necessary repositories
@@ -38,45 +34,36 @@ RUN git clone --depth 1 https://github.com/turboderp/exllamav2 /app/exllamav2 &&
     git clone --depth 1 https://github.com/bodaay/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader
 
 # Create virtual environment in /venv
-RUN python3.11 -m venv /venv
+RUN python3.12 -m venv /venv
 RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
-# Install pip and packages within the virtual environment with --no-cache-dir to avoid caching
-RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
-    # /venv/bin/pip install torch==2.1.2+cu121 torchvision==0.16.2+cu121 torchaudio==2.1.2+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
-    /venv/bin/pip install transformers fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru jupyterlab-vim polars pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress --no-cache-dir && \
-    /venv/bin/pip install -U "huggingface_hub[cli]" --no-cache-dir && \
-    /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir
-    # /venv/bin/pip install "transformers>=4.37.2" fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru jupyterlab-vim polars --no-cache-dir
+# Install pip and packages within the virtual environment
+RUN /venv/bin/pip install --upgrade pip setuptools wheel && \
+    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+    /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress && \
+    /venv/bin/pip install -U "huggingface_hub[cli]" && \
+    MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation && \
+    /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
 
 
 # Install hfdownloader
 # Wget go for hfdownloader
-RUN mkdir -p /tmp && \
-    wget -q -O go1.21.6.linux-amd64.tar.gz https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
-    rm go1.21.6.linux-amd64.tar.gz
-
+RUN wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
 ENV PATH="$PATH:/usr/local/go/bin"
-
-# Build hfdownloader
-RUN mkdir -p /app/HuggingFaceModelDownloader/output && \
-    cd /app/HuggingFaceModelDownloader && \
-    /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
-    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec chmod +x {} \; && \
-    find /app/HuggingFaceModelDownloader/output -name "hfdownloader_linux_amd64_*" -type f -exec mv {} /usr/local/bin/hfdownloader \; && \
-    rm -rf /app/HuggingFaceModelDownloader
+RUN cd  /app/HuggingFaceModelDownloader && /app/HuggingFaceModelDownloader/BuildLinuxAmd64.sh && \
+    chmod +x /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* && \
+    mv /app/HuggingFaceModelDownloader/output/hfdownloader_linux_amd64_* /usr/local/bin/hfdownloader && cd /app
 
 # Install tabbyAPI dependencies
 RUN /bin/bash -c "source /venv/bin/activate && \
     cd /app/tabbyAPI && \
     /app/tabbyAPI/start.sh --update-deps --gpu-lib cu121 && \
-    pip install .[extras] --no-cache-dir && pip cache purge"
+    pip install .[extras]"
 
 # Stage 2: Runtime environment
-FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu20.04 AS tabbyapi-exllamav2-builder-image-runtime
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04 AS tabbyapi-exllamav2-builder-image-runtime
+
 ENV NVIDIA_VISIBLE_DEVICES=all \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     DEBIAN_FRONTEND=noninteractive \
@@ -84,18 +71,15 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-# Install runtime dependencies including Python 3.11
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Install runtime dependencies including Python 3.12
+RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
-    && add-apt-repository 'ppa:deadsnakes/ppa' \
-    && apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
     nfs-common \
     rsync \
     rclone \
@@ -104,9 +88,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Python 3.11 as the default Python version
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
-    && update-alternatives --set python3 /usr/bin/python3.11
+# Set Python 3.12 as the default Python version
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
+    && update-alternatives --set python3 /usr/bin/python3.12
 
 # Copy only necessary files from tabbyapi-exllamav2-builder-image
 COPY --from=tabbyapi-exllamav2-builder-image /venv /venv
@@ -116,10 +100,7 @@ COPY --from=tabbyapi-exllamav2-builder-image /app/exui /app/exui
 COPY --from=tabbyapi-exllamav2-builder-image /usr/local/bin/hfdownloader /usr/local/bin/hfdownloader
 
 # Create symlink for consistency
-# Ensure Python points to the virtual environment's Python
-RUN ln -sf /venv/bin/python /usr/bin/python && \
-    ln -sf /venv/bin/python3 /usr/bin/python3 && \
-    ln -s /venv /app/tabbyAPI/venv
+RUN ln -s /venv /app/tabbyAPI/venv
 
 ENV PATH="/venv/bin:$PATH"
 
@@ -129,12 +110,13 @@ RUN mkdir -p /mnt/exllamav2/{gguf,exl2} /mnt/converter /mnt/temp/{download,gguf,
 WORKDIR /app
 
 COPY entrypoint /app/entrypoint
+
 RUN chmod +x /app/entrypoint/*.sh
 
 # Expose ports for Jupyter Lab and exllamav2
 EXPOSE 8888 5000
 
-# Add LABELs
+# Add LABELs near the end of your Dockerfile
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.title="TabbyAPI ExLlamaV2"
 LABEL org.opencontainers.image.description="TabbyAPI with ExLlamaV2 support"
