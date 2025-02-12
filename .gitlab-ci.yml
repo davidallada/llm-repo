@@ -62,7 +62,7 @@ trigger-webhook:
     name: ubuntu:20.04
     entrypoint: [ "" ]
   before_script:
-  - apt-get update && apt-get install wget
+  - apt-get update && apt-get install wget -y
   script:
   - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
   rules:
