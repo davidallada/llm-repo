@@ -1,6 +1,6 @@
 stages:
-  - build
-  - deploy
+- build
+- deploy
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -8,7 +8,7 @@ variables:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - /cache/kaniko  # Mount the PVC cache for Kaniko
+  - /cache/kaniko # Mount the PVC cache for Kaniko
 
 docker-build:
   stage: build
@@ -16,8 +16,8 @@ docker-build:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  - mkdir -p /kaniko/.docker
+  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
     echo "Building Docker image with version: $VERSION"
@@ -31,11 +31,12 @@ docker-build:
         --cache-repo="$CI_REGISTRY/$CI_PROJECT_NAMESPACE/cache"  # Cache repo in GitLab registry
         --cache-dir=/kaniko/cache  # Kaniko uses this to cache layers
         --cache-copy-layers \
-        --snapshotMode=redo
+        --snapshotMode=redo \
+        --compressed-caching=false
   rules:
-    - if: '$CI_COMMIT_BRANCH'
-      exists:
-        - docker/Dockerfile
-      changes:
-        - docker/**
-        - .gitlab-ci.yml
+  - if: '$CI_COMMIT_BRANCH'
+    exists:
+    - docker/Dockerfile
+    changes:
+    - docker/**
+    - .gitlab-ci.yml
