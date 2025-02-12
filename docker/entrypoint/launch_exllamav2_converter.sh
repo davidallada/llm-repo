@@ -63,7 +63,7 @@ process_measurements_json() {
     else
         echo "Processing measurements for $formatted_string..."
         mkdir -p "$measurement_json_dir/$formatted_string"
-        python3 /app/exllamav2/convert.py \
+        source /venv/bin/activate && python3 /app/exllamav2/convert.py \
             -i "$gguf_dir/$formatted_string" \
             -o "/mnt/temp/$formatted_string-temp" \
             -om "$measurement_json_dir/$formatted_string/measurement.json"
@@ -89,7 +89,7 @@ quantize_gguf_to_exl2() {
             process_measurements_json "$model_name"
         fi
 
-        python3 /app/exllamav2/convert.py \
+        source /venv/bin/activate && python3 /app/exllamav2/convert.py \
             -i "$gguf_dir/$formatted_string" \
             -o "/mnt/temp/${formatted_string}-${bpw}-bpw" \
             -cf "$exl2_path" \
