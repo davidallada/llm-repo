@@ -16,7 +16,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
 WORKDIR /app
 
 # Install system dependencies
-RUN mkdir /tmp && chmod 1777 /tmp && apt-get update && \
+RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
     apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
@@ -29,8 +29,6 @@ RUN mkdir /tmp && chmod 1777 /tmp && apt-get update && \
     python3.12-venv \
     python3.12-dev \
     ninja-build && \
-    mkdir -p /apt-packages && \
-    cp -r /var/cache/apt/archives/*.deb /apt-packages/ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -79,12 +77,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 WORKDIR /app
-RUN mkdir /tmp && chmod 1777 /tmp
-
-COPY --from=tabbyapi-exllamav2-builder-image /apt-packages /apt-packages
-
-RUN dpkg -i /apt-packages/*.deb || apt-get -f install -y && \
-    rm -rf /apt-packages
+RUN mkdir -p /tmp && chmod 1777 /tmp
 
 RUN apt-get update && \
     apt-get install -y software-properties-common apt-utils && \
