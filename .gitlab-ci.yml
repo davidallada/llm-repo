@@ -8,7 +8,7 @@ variables:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - /cache/kaniko # Mount the PVC cache for Kaniko
+  - .cache/kaniko # Changed from /cache/kaniko to .cache/kaniko
 
 docker-build:
   stage: build
@@ -28,8 +28,8 @@ docker-build:
         --destination "${CI_REGISTRY_IMAGE}:latest" \
         --target tabbyapi-exllamav2-builder-image-runtime \
         --cache=true \
-        --cache-repo="$CI_REGISTRY/$CI_PROJECT_NAMESPACE/cache"  # Cache repo in GitLab registry
-        --cache-dir=/kaniko/cache  # Kaniko uses this to cache layers
+        --cache-repo="${CI_REGISTRY_IMAGE}/cache" \  # Changed to use project's registry
+        --cache-dir=/cache \  # Changed to match cache path
         --cache-copy-layers \
         --snapshotMode=redo \
         --compressed-caching=false
