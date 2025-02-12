@@ -13,7 +13,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-RUN mkdir -p /tmp && chmod 1777 /tmp
+RUN mkdir -p /tmp
+RUN chmod 1777 /tmp
 WORKDIR /app
 
 # Install system dependencies
@@ -78,7 +79,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     LC_ALL=C.UTF-8 \
     VERSION=${VERSION}
 
-RUN mkdir -p /tmp && chmod 1777 /tmp
+RUN mkdir -p /tmp
+RUN chmod 1777 /tmp
 WORKDIR /app
 
 RUN apt-get update && \
