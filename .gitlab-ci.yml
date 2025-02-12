@@ -19,7 +19,11 @@ docker-build:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   before_script:
+  - mkdir -p /cache
   - mkdir -p /kaniko/.docker
+  - mkdir -p .cache/kaniko
+  - mkdir -p .cache/pip
+  - mkdir -p .cache/apt
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
