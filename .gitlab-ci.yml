@@ -8,9 +8,9 @@ variables:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - .cache/kaniko
-  - .cache/pip
-  - .cache/apt
+  - /cache/kaniko
+  - /cache/pip
+  - /cache/apt
   policy: pull-push
 
 docker-build:
@@ -21,9 +21,9 @@ docker-build:
   before_script:
   - mkdir -p /cache
   - mkdir -p /kaniko/.docker
-  - mkdir -p .cache/kaniko
-  - mkdir -p .cache/pip
-  - mkdir -p .cache/apt
+  - mkdir -p /cache/kaniko
+  - mkdir -p /cache/pip
+  - mkdir -p /cache/apt
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
@@ -41,24 +41,21 @@ docker-build:
       --compressed-caching=false \
       --use-new-run \
       --snapshot-mode=redo \
-      --ignore-path=/root/.cache \
+      --ignore-path=/cache \
       --ignore-path=/tmp \
       --ignore-path=**/*.pyc \
       --ignore-path=**/__pycache__ \
       --ignore-path=**/.pytest_cache \
-      --ignore-path=.cache/pip/* \
-      --ignore-path=.cache/apt/* \
+      --ignore-path=/cache/pip/* \
+      --ignore-path=/cache/apt/* \
       --cleanup
   variables:
-    PIP_CACHE_DIR: ${CI_PROJECT_DIR}/.cache/pip
-    APT_CACHE_DIR: ${CI_PROJECT_DIR}/.cache/apt
+    PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
+    APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
     - docker/Dockerfile
-    changes:
-    - docker/**
-    - .gitlab-ci.yml
 
 trigger-webhook:
   stage: deploy
