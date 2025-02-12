@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     git \
     wget \
     software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
+    && add-apt-repository 'ppa:deadsnakes/ppa' \
     && apt-get update && \
     apt-get install -y --no-install-recommends \
     python3.12 \
@@ -86,7 +86,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && \
     apt-get install -y --no-install-recommends \
     software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
+    && add-apt-repository 'ppa:deadsnakes/ppa' \
     && apt-get update && \
     apt-get install -y --no-install-recommends \
     python3.12 \
