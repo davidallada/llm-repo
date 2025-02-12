@@ -82,9 +82,8 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     VERSION=${VERSION}
 
 WORKDIR /app
-RUN mkdir -p /tmp && chmod 1777 /tmp
 
-RUN apt-get update && \
+RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
     apt-get install -y software-properties-common apt-utils && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
