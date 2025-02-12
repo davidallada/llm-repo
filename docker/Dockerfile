@@ -42,13 +42,20 @@ RUN python3.12 -m venv /venv
 RUN ln -s /venv /app/tabbyAPI/venv
 ENV PATH="/venv/bin:$PATH"
 
-# Install pip and packages within the virtual environment with --no-cache-dir to avoid caching
-RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
-    /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
-    /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress --no-cache-dir && \
-    /venv/bin/pip install -U "huggingface_hub[cli]" --no-cache-dir && \
-    MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir && \
-    /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars --no-cache-dir
+# # Install pip and packages within the virtual environment with --no-cache-dir to avoid caching
+# RUN /venv/bin/pip install --upgrade pip setuptools wheel --no-cache-dir && \
+#     /venv/bin/pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir && \
+#     /venv/bin/pip install pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress --no-cache-dir && \
+#     /venv/bin/pip install -U "huggingface_hub[cli]" --no-cache-dir && \
+#     MAX_JOBS=4 /venv/bin/pip install flash-attn --no-build-isolation --no-cache-dir && \
+#     /venv/bin/pip install fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars --no-cache-dir
+
+RUN /venv/bin/pip install --upgrade pip setuptools wheel \
+    torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir \
+    pandas ninja fastparquet safetensors sentencepiece pygments websockets regex pynvml exllamav2 Flask waitress \
+    "huggingface_hub[cli]" flash-attn --no-build-isolation --no-cache-dir \
+    fastapi pydantic PyYAML progress uvicorn jinja2 colorlog loguru transformers jupyterlab-vim polars
+
 
 # Install hfdownloader
 # Wget go for hfdownloader
