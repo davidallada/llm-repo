@@ -9,6 +9,8 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
   - .cache/kaniko
+  - .cache/pip
+  - .cache/apt
   policy: pull-push
 
 docker-build:
@@ -40,7 +42,12 @@ docker-build:
       --ignore-path=**/*.pyc \
       --ignore-path=**/__pycache__ \
       --ignore-path=**/.pytest_cache \
+      --ignore-path=.cache/pip/* \
+      --ignore-path=.cache/apt/* \
       --cleanup
+  variables:
+    PIP_CACHE_DIR: ${CI_PROJECT_DIR}/.cache/pip
+    APT_CACHE_DIR: ${CI_PROJECT_DIR}/.cache/apt
   rules:
   - if: '$CI_COMMIT_BRANCH'
     exists:
@@ -56,7 +63,6 @@ trigger-webhook:
     entrypoint: [ "" ]
   script:
   - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
-
   rules:
   - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   needs:
