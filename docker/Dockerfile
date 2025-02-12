@@ -121,6 +121,8 @@ RUN ln -s /venv /app/tabbyAPI/venv
 
 ENV PATH="/venv/bin:$PATH"
 
+RUN /venv/bin/pip3 install --upgrade pip setuptools wheel
+
 # Create necessary directories
 RUN mkdir -p /mnt/exllamav2/{gguf,exl2} /mnt/converter /mnt/temp/{download,gguf,exl2,temp} /app/tabby_data /app/model_directories/{base_models,models,draft_models,embedding_models,loras}
 
