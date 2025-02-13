@@ -1,6 +1,10 @@
 {
     "model_configs": [
         {
+            "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+            "bpw": []
+        },
+        {
             "model_name": "Qwen/Qwen2.5-VL-72B-Instruct",
             "bpw": [4.0, 4.5]
         },
@@ -170,10 +174,6 @@
         },
         {
             "model_name": "hexgrad/Kokoro-TTS",
-            "bpw": []
-        },
-        {
-            "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
             "bpw": []
         }
     ]
