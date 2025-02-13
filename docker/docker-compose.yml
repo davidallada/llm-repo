@@ -74,6 +74,12 @@ services:
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: webserver
 
 
 # curl http://10.69.1.169:5000/v1/model/load \
