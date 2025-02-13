@@ -70,7 +70,7 @@ services:
     command: embeddings_only
     environment:
       - NAME=TabbyAPI
-      - CUDA_VISIBLE_DEVICES=GPU-fc0bf670-34e2-325e-ac6c-08cf5596565e
+      - CUDA_VISIBLE_DEVICES=GPU-da6c157e-0c5f-0968-a088-185d90537446
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
