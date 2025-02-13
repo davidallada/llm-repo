@@ -108,7 +108,7 @@ model:
 
   # Enable different cache modes for VRAM savings (default: FP16).
   # Possible values: 'FP16', 'Q8', 'Q6', 'Q4'.
-  cache_mode: Q8
+  cache_mode: Q6
 
   # Size of the prompt cache to allocate (default: max_seq_len).
   # Must be a multiple of 256 and can't be less than max_seq_len.
@@ -164,7 +164,7 @@ draft_model:
 
   # Cache mode for draft models to save VRAM (default: FP16).
   # Possible values: 'FP16', 'Q8', 'Q6', 'Q4'.
-  draft_cache_mode: Q8
+  draft_cache_mode: Q6
 
 # Options for Loras
 lora:
