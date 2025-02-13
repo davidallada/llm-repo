@@ -29,6 +29,7 @@ services:
       service: tabbyapi-base
     container_name: tabbyapi-webserver
     restart: always
+    command: webserver
     environment:
       - NAME=TabbyAPI
       - CUDA_VISIBLE_DEVICES=GPU-2652c5d6-641a-fa93-418c-3e9afd215a34,GPU-2f4ddefb-b5ee-8687-eeca-da77f315b228,GPU-da6c157e-0c5f-0968-a088-185d90537446
@@ -78,7 +79,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    command: webserver
 
 
 # curl http://10.69.1.169:5000/v1/model/load \
