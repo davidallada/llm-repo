@@ -193,7 +193,7 @@ embeddings:
   embeddings_device: cuda
  
   # An initial embedding model to load on the infinity backend.
-  embedding_model_name: dunzhang_stella_en_1.5B_v5
+  embedding_model_name: Alibaba-NLP_gte-Qwen2-1.5B-instruct
 
 # Options for Sampling
 sampling:

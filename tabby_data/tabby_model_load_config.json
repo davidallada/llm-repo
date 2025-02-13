@@ -170,6 +170,11 @@
             "pretty_model_name": "answerdotai_ModernBERT-large",
             "model_name": "answerdotai_ModernBERT-large",
             "comment": "ModernBERT"
+        },
+        {
+            "pretty_model_name": "Qwen2-1.5B-embed",
+            "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+            "comment": "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
         }
     ],
     "lora_configs": []

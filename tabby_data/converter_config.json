@@ -171,6 +171,10 @@
         {
             "model_name": "hexgrad/Kokoro-TTS",
             "bpw": []
+        },
+        {
+            "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+            "bpw": []
         }
     ]
 }
