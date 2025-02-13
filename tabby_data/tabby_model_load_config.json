@@ -173,7 +173,7 @@
         },
         {
             "pretty_model_name": "Qwen2-1.5B-embed",
-            "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+            "model_name": "Alibaba-NLP_gte-Qwen2-1.5B-instruct",
             "comment": "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
         }
     ],
