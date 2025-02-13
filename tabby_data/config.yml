@@ -93,7 +93,7 @@ model:
 
   # An integer array of GBs of VRAM to split between GPUs (default: []).
   # Used with tensor parallelism.
-  gpu_split: []
+  gpu_split: [24, 24, 16]
 
   # Rope scale (default: 1.0).
   # Same as compress_pos_emb.
