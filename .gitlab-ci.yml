@@ -8,9 +8,9 @@ variables:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - cache/kaniko
-  - cache/pip
-  - cache/apt
+  - /cache/kaniko
+  - /cache/pip
+  - /cache/apt
   policy: pull-push
 
 docker-build:
@@ -19,11 +19,11 @@ docker-build:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   before_script:
-  - mkdir -p ${CI_PROJECT_DIR}/cache
-  - mkdir -p ${CI_PROJECT_DIR}/cache/kaniko
-  - mkdir -p ${CI_PROJECT_DIR}/cache/pip
-  - mkdir -p ${CI_PROJECT_DIR}/cache/apt
+  - mkdir -p /cache
   - mkdir -p /kaniko/.docker
+  - mkdir -p /cache/kaniko
+  - mkdir -p /cache/pip
+  - mkdir -p /cache/apt
   - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
@@ -34,16 +34,20 @@ docker-build:
       --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
       --destination "${CI_REGISTRY_IMAGE}:latest" \
       --target tabbyapi-exllamav2-builder-image-runtime \
-      --cache=true \
+      --cache=false \
       --cache-repo="${CI_REGISTRY_IMAGE}/cache" \
-      --cache-dir="${CI_PROJECT_DIR}/cache" \
+      --cache-dir=/cache \
+      --cache-copy-layers \
       --compressed-caching=false \
+      --use-new-run \
+      --ignore-path=/cache \
       --ignore-path=/tmp \
       --ignore-path=**/*.pyc \
       --ignore-path=**/__pycache__ \
       --ignore-path=**/.pytest_cache \
+      --ignore-path=/cache/pip/* \
+      --ignore-path=/cache/apt/* \
       --cleanup
-
   variables:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
