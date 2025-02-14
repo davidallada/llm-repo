@@ -78,7 +78,7 @@ services:
       - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
       - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
-      - MODEL_LOAD_FILE=/app/alt_tabby_data/tabby_model_load_config.json
+      - MODEL_LOAD_FILE=/app/tabby_data/alt_tabby_model_load_config.json
     volumes:
       - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-repo/model_directories/secondary:/app/model_directories
