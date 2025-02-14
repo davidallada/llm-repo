@@ -6,6 +6,21 @@ source /venv/bin/activate
 # Read in /app/tabby_data/tabby_model_load_config.json
 config_file="/app/tabby_data/tabby_model_load_config.json"
 
+# Assign arguments to named variables with default values
+instance_name="${1:-primary}"
+instance_model_config_name="${2:-primary_model_configs}"
+instance_embedding_model_config_name="${3:-primary_embedding_configs}"
+
+base_models_to_keep="/tmp/${instance_name}/base_models_to_keep"
+draft_models_to_keep="/tmp/${instance_name}/draft_models_to_keep"
+
+base_model_dir="/app/model_directories/${instance_name}/base_models"
+draft_model_dir="/app/model_directories/${instance_name}/draft_models"
+
+instance_model_dir="/app/model_directories/${instance_name}/models"
+instance_draft_model_dir="/app/model_directories/${instance_name}/draft_models"
+instance_embedding_model_dir="/app/model_directories/${instance_name}/embedding_models"
+
 get_model_lists() {
     local config_file="$1"
     local config_key="$2"
@@ -65,8 +80,8 @@ load_model_configs() {
     fi
 
     # Usage of the function
-    readarray -t base_models < <(get_model_lists "$config_file" "model_configs" | sed '/---/q' | sed '$d')
-    readarray -t draft_models < <(get_model_lists "$config_file" "model_configs" | sed -n '/---/,$p' | tail -n +2)
+    readarray -t base_models < <(get_model_lists "$config_file" "$instance_model_config_name" | sed '/---/q' | sed '$d')
+    readarray -t draft_models < <(get_model_lists "$config_file" "$instance_model_config_name" | sed -n '/---/,$p' | tail -n +2)
 
     # Now base_models and draft_models are available as arrays
     echo "Base models: ${base_models[*]}"
@@ -76,43 +91,43 @@ load_model_configs() {
     echo "Processing base models..."
     for model in "${base_models[@]}"; do
         if [ -n "$model" ] && [ "$model" != "None" ]; then
-            copy_model "$EXL2_STORAGE_DIR" "/app/model_directories/base_models" "$model" "base"
-            echo "$model" >> /tmp/base_models_to_keep
+            copy_model "$EXL2_STORAGE_DIR" "$base_model_dir" "$model" "base"
+            echo "$model" >> "$base_models_to_keep"
         else
             echo "Skipping empty or None base model"
         fi
     done
 
     echo "Removing unnecessary base models..."
-    find /app/model_directories/base_models -maxdepth 1 -type d | while read dir; do
+    find "$base_model_dir" -maxdepth 1 -type d | while read dir; do
         base_dir=$(basename "$dir")
-        if [ "$base_dir" != "base_models" ] && ! grep -q "^$base_dir$" /tmp/base_models_to_keep; then
+        if [ "$base_dir" != "base_models" ] && ! grep -q "^$base_dir$" "$base_models_to_keep"; then
             echo "Removing $dir"
             rm -rf "$dir"
         fi
     done
-    rm /tmp/base_models_to_keep
+    rm "$base_models_to_keep"
 
     # Copy draft models and remove unnecessary ones
     echo "Processing draft models..."
     for model in "${draft_models[@]}"; do
         if [ -n "$model" ] && [ "$model" != "None" ]; then
-            copy_model "$EXL2_STORAGE_DIR" "/app/model_directories/draft_models" "$model" "draft"
-            echo "$model" >> /tmp/draft_models_to_keep
+            copy_model "$EXL2_STORAGE_DIR" "$draft_model_dir" "$model" "draft"
+            echo "$model" >> "$draft_models_to_keep"
         else
             echo "Skipping empty or None draft model"
         fi
     done
 
     echo "Removing unnecessary draft models..."
-    find /app/model_directories/draft_models -maxdepth 1 -type d | while read dir; do
+    find "$draft_model_dir" -maxdepth 1 -type d | while read dir; do
         base_dir=$(basename "$dir")
-        if [ "$base_dir" != "draft_models" ] && ! grep -q "^$base_dir$" /tmp/draft_models_to_keep; then
+        if [ "$base_dir" != "draft_models" ] && ! grep -q "^$base_dir$" "$draft_models_to_keep"; then
             echo "Removing $dir"
             rm -rf "$dir"
         fi
     done
-    rm /tmp/draft_models_to_keep
+    rm "$draft_models_to_keep"
 
     # Load models into respective directories
     echo "Loading models into respective directories..."
@@ -124,14 +139,14 @@ load_model_configs() {
 
         # Use pretty_name for the directory if available, otherwise use model_name
         dir_name="${pretty_name:-$model_name}"
-        model_dir="/app/model_directories/models/$dir_name"
+        model_dir="$instance_model_dir/$dir_name"
 
         # Create directory for the model
         mkdir -p "$model_dir"
 
         # Symlink files from base model
         echo "Symlinking files for $model_name to $dir_name..."
-        find "/app/model_directories/base_models/$model_name" -type f | while read file; do
+        find "$base_model_dir/$model_name" -type f | while read file; do
             base_name=$(basename "$file")
             if [ "$base_name" != "tabby_config.yml" ]; then
                 ln -sf "$file" "$model_dir/$base_name"
@@ -163,8 +178,8 @@ load_embedding_model_configs() {
     fi
 
     # Usage of the function
-    readarray -t base_models < <(get_model_lists "$config_file" "embedding_configs" | sed '/---/q' | sed '$d')
-    readarray -t draft_models < <(get_model_lists "$config_file" "embedding_configs" | sed -n '/---/,$p' | tail -n +2)
+    readarray -t base_models < <(get_model_lists "$config_file" "$instance_embedding_model_config_name" | sed '/---/q' | sed '$d')
+    readarray -t draft_models < <(get_model_lists "$config_file" "$instance_embedding_model_config_name" | sed -n '/---/,$p' | tail -n +2)
 
     # Now base_models and draft_models are available as arrays
     echo "Embedding models: ${base_models[*]}"
@@ -173,7 +188,7 @@ load_embedding_model_configs() {
     echo "Processing base models..."
     for model in "${base_models[@]}"; do
         if [ -n "$model" ] && [ "$model" != "None" ]; then
-            copy_model "$EXL2_STORAGE_DIR" "/app/model_directories/embedding_models" "$model" "embedding"
+            copy_model "$EXL2_STORAGE_DIR" "$instance_embedding_model_dir" "$model" "embedding"
         else
             echo "Skipping empty or None embedding model"
         fi
