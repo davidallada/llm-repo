@@ -49,7 +49,7 @@ logging:
 model:
   # Directory to look for models (default: models).
   # Windows users, do NOT put this path in quotes!
-  model_dir: /app/model_directories/primary/models
+  model_dir: /app/model_directories/models
 
   # Allow direct loading of models from a completion or chat completion request (default: False).
   # This method of loading is strict by default.
@@ -93,7 +93,7 @@ model:
 
   # An integer array of GBs of VRAM to split between GPUs (default: []).
   # Used with tensor parallelism.
-  gpu_split: [ 24, 24, 16 ]
+  gpu_split: [24, 24, 16]
 
   # Rope scale (default: 1.0).
   # Same as compress_pos_emb.
@@ -146,7 +146,7 @@ model:
     # This will use more VRAM!
 draft_model:
   # Directory to look for draft models (default: models)
-  draft_model_dir: /app/model_directories/primary/draft_models
+  draft_model_dir: /app/model_directories/draft_models
 
   # An initial draft model to load.
   # Ensure the model is in the model directory.
@@ -169,7 +169,7 @@ draft_model:
 # Options for Loras
 lora:
   # Directory to look for LoRAs (default: loras).
-  lora_dir: /app/model_directories/primary/loras
+  lora_dir: /app/model_directories/loras
 
   # List of LoRAs to load and associated scaling factors (default scale: 1.0).
   # For the YAML file, add each entry as a YAML list:
@@ -182,7 +182,7 @@ lora:
     # Install it via "pip install .[extras]"
 embeddings:
   # Directory to look for embedding models (default: models).
-  embedding_model_dir: /app/model_directories/primary/embedding_models
+  embedding_model_dir: /app/model_directories/embedding_models
 
   # Device to load embedding models on (default: cpu).
   # Possible values: cpu, auto, cuda.

@@ -1,13 +1,13 @@
 {
-    "primary_model_configs": [
+    "model_configs": [
         {
-            "pretty_model_name": "Qwen 2.5 14B 250k",
+            "pretty_model_name": "Qwen 2.5 14B 400k",
             "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-4.0-bpw",
             "draft_model": "",
             "tabby_config": {
                 "max_seq_len": 253952
             },
-            "comment": "250k 14b"
+            "comment": "1m 14b"
         },
         {
             "pretty_model_name": "Qwen 2.5 7B 1M",
@@ -16,7 +16,7 @@
             "tabby_config": {
                 "max_seq_len": 999424
             },
-            "comment": "1m 7b"
+            "comment": "1m 14b"
         },
         {
             "pretty_model_name": "Qwen2.5-Coder-32B-daily-6.5bpw-100k",
@@ -63,6 +63,15 @@
                 "max_seq_len": 32768
             },
             "comment": "QwQ Preview"
+        },
+        {
+            "pretty_model_name": "homeassistant-llama-8b-4bpw-8k",
+            "model_name": "meta-llama_Llama-3.1-8B-Instruct-4.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 8192
+            },
+            "comment": "For homeassistant"
         },
         {
             "pretty_model_name": "llama-8B-4bpw-fast-32k",
@@ -128,7 +137,7 @@
             "comment": "Big deepseek"
         },
         {
-            "pretty_model_name": "R1-Distill-Qwen2.5-32B-6.5bpw-draft",
+            "pretty_model_name": "R1-Distill-Qwen2.5-6.5bpw-draft",
             "model_name": "deepseek-ai_DeepSeek-R1-Distill-Qwen-32B-6.5-bpw",
             "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B-4.0-bpw",
             "tabby_config": {
@@ -146,7 +155,7 @@
             "comment": "Big deepseek"
         }
     ],
-    "primary_embedding_configs": [
+    "embedding_configs": [
         {
             "pretty_model_name": "dunzhang_stella_en_1.5B_v5",
             "model_name": "dunzhang_stella_en_1.5B_v5",
@@ -168,38 +177,5 @@
             "comment": "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
         }
     ],
-    "primary_lora_configs": [],
-    "secondary_model_configs": [
-        {
-            "pretty_model_name": "homeassistant-alt-llama-8b-4bpw-8k",
-            "model_name": "meta-llama_Llama-3.1-8B-Instruct-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 8192
-            },
-            "comment": "For homeassistant"
-        }
-    ],
-    "secondary_embedding_configs": [
-        {
-            "pretty_model_name": "dunzhang_stella_en_1.5B_v5",
-            "model_name": "dunzhang_stella_en_1.5B_v5",
-            "comment": "Stella"
-        },
-        {
-            "pretty_model_name": "google_Gemma-Embeddings-v1.0",
-            "model_name": "google_Gemma-Embeddings-v1.0",
-            "comment": "Gemma"
-        },
-        {
-            "pretty_model_name": "answerdotai_ModernBERT-large",
-            "model_name": "answerdotai_ModernBERT-large",
-            "comment": "ModernBERT"
-        },
-        {
-            "pretty_model_name": "Qwen2-1.5B-embed",
-            "model_name": "Alibaba-NLP_gte-Qwen2-1.5B-instruct",
-            "comment": "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
-        }
-    ]
+    "lora_configs": []
 }
