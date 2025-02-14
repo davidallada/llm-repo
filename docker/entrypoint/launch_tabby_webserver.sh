@@ -4,7 +4,7 @@
 source /venv/bin/activate
 
 # Read in /app/tabby_data/tabby_model_load_config.json
-config_file="/app/tabby_data/tabby_model_load_config.json"
+config_file="$MODEL_LOAD_FILE"
 
 get_model_lists() {
     local config_file="$1"

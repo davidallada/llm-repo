@@ -30,7 +30,7 @@ case "$1" in
         echo "Starting Embeddings Only..."
         cp /app/tabby_data/embeddings_config.yml /app/tabbyAPI/config.yml
         # Add the command to start your embeddings_only process here
-        /app/entrypoint/launch_embeddings_only.sh
+        /app/entrypoint/launch_tabby_webserver.sh
         ;;
     *)
         echo "Invalid mode. Usage: entrypoint.sh webserver|converter|shell|embeddings_only"
