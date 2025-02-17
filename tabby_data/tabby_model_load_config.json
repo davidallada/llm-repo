@@ -170,8 +170,7 @@
                 "max_seq_len": 32768
             },
             "comment": ""
-        },
-        
+        }
     ],
     "embedding_configs": [
         {
