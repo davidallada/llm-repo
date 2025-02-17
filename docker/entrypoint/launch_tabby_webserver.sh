@@ -6,6 +6,9 @@ source /venv/bin/activate
 # Read in /app/tabby_data/tabby_model_load_config.json
 config_file="$MODEL_LOAD_FILE"
 
+touch /tmp/base_models_to_keep
+touch /tmp/draft_models_to_keep
+
 get_model_lists() {
     local config_file="$1"
     local config_key="$2"
