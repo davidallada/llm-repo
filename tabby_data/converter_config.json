@@ -9,6 +9,14 @@
             "bpw": [4.0, 4.5, 5.2]
         },
         {
+            "model_name": "watt-ai/watt-tool-70B",
+            "bpw": [4.0, 5.2]
+        },
+        {
+            "model_name": "watt-ai/watt-tool-8B",
+            "bpw": [4.0, 5.2, 8.0]
+        },
+        {
             "model_name": "Qwen/Qwen2.5-VL-7B-Instruct",
             "bpw": [4.0, 5.2, 8.0]
         },
