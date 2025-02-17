@@ -1,40 +1,13 @@
 {
     "model_configs": [
         {
-            "pretty_model_name": "Qwen 2.5 14B 1m 4.0 BPW",
-            "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 999424
-            },
-            "comment": "1m 14b"
-        },
-        {
-            "pretty_model_name": "Qwen 2.5 14B 500k 4.0 BPW",
-            "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-4.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 503808
-            },
-            "comment": "500k 14b"
-        },
-        {
-            "pretty_model_name": "Qwen 2.5 14B 1m 5.2 BPW",
-            "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-5.2-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 999424
-            },
-            "comment": "1m 14b"
-        },
-        {
-            "pretty_model_name": "Qwen 2.5 14B 500k 5.2 BPW",
+            "pretty_model_name": "Qwen 2.5-14B 500k-5.2 BPW",
             "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-5.2-bpw",
             "draft_model": "",
             "tabby_config": {
                 "max_seq_len": 503808
             },
-            "comment": "500k 14b"
+            "comment": "60 GB VRAM Required (3x4090)"
         },
         {
             "pretty_model_name": "Qwen 2.5 7B 1M 5.2 BPW",
@@ -43,16 +16,7 @@
             "tabby_config": {
                 "max_seq_len": 999424
             },
-            "comment": "1m 7b"
-        },
-        {
-            "pretty_model_name": "Qwen 2.5 7B 1M 4.0 BPW",
-            "model_name": "Qwen_Qwen2.5-7B-Instruct-1M-4.2-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 999424
-            },
-            "comment": "1m 7b"
+            "comment": "36 GB VRAM Required (2x4090)"
         },
         {
             "pretty_model_name": "Qwen2.5-Coder-32B-daily-6.5bpw-100k",
