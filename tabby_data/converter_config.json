@@ -14,7 +14,7 @@
         },
         {
             "model_name": "Qwen/Qwen2.5-VL-3B-Instruct",
-            "bpw": [4.0, 8.0]
+            "bpw": [4.0, 5.2, 8.0]
         },
         {
             "model_name": "internlm/internlm3-8b-instruct",
