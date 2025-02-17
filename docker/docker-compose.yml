@@ -20,8 +20,8 @@ services:
     volumes:
       - pip-cache:/cache/pip
       - apt-cache:/cache/apt
-      - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
-      - /mnt/docker_data/llm-repo/model_directories:/app/model_directories
+      - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
+      - /mnt/docker_data/llm-gpu-clone/model_directories:/app/model_directories
     command: exit
 
   tabbyapi:
@@ -41,8 +41,8 @@ services:
       - "5000:5000"
       - "8076:8888"
     volumes:
-      - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
-      - /mnt/docker_data/llm-repo/model_directories/primary:/app/model_directories
+      - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
+      - /mnt/docker_data/llm-gpu-clone/model_directories/primary:/app/model_directories
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
       interval: 30s
@@ -80,8 +80,8 @@ services:
       - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
       - MODEL_LOAD_FILE=/app/tabby_data/alt_tabby_model_load_config.json
     volumes:
-      - /mnt/docker_data/llm-repo/tabby_data:/app/tabby_data
-      - /mnt/docker_data/llm-repo/model_directories/secondary:/app/model_directories
+      - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
+      - /mnt/docker_data/llm-gpu-clone/model_directories/secondary:/app/model_directories
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
       interval: 30s
