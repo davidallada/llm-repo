@@ -150,7 +150,7 @@
         },
         {
             "model_name": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
-            "bpw": [4.0, 8.0]
+            "bpw": [4.0, 5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen2.5-14B-Instruct-1M",
