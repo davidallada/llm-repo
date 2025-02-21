@@ -39,6 +39,7 @@ RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
 #     git clone --depth 1 https://github.com/bodaay/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader
 
 # Testing fix for TabbyAPI
+# trigger the build again
 RUN git clone --depth 1 https://github.com/turboderp/exllamav2 /app/exllamav2 && \
     git clone --depth 1 -b add-stop-condition-deduping https://github.com/davidallada/tabbyAPI /app/tabbyAPI && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
