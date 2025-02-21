@@ -47,7 +47,7 @@ class Pipeline:
                 return [
                     {
                         "id": "error",
-                        "name": "Could not fetch models from TabbyAPOI, please update the API Key in the valves.",
+                        "name": "Could not fetch models from TabbyAPI, please update the API Key in the valves.",
                     },
                 ]
         else:
