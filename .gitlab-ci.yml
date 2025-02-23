@@ -34,9 +34,8 @@ docker-build:
       --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
       --destination "${CI_REGISTRY_IMAGE}:latest" \
       --target tabbyapi-exllamav2-builder-image-runtime \
-      --cache=false \
-      --cache-repo="${CI_REGISTRY_IMAGE}/cache" \
-      --cache-dir=/cache \
+      --cache=true \
+      --cache-repo \
       --cache-copy-layers \
       --compressed-caching=false \
       --use-new-run \
