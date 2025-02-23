@@ -41,7 +41,7 @@ RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
 # Testing fix for TabbyAPI
 # trigger the build again
 RUN git clone --depth 1 https://github.com/turboderp/exllamav2 /app/exllamav2 && \
-    git clone --depth 1 -b create-native-function-calling-conversion https://github.com/davidallada/tabbyAPI /app/tabbyAPI && \
+    git clone --depth 1 -b bug-fix-finish_reason-in-openai-tool-call-choice https://github.com/davidallada/tabbyAPI /app/tabbyAPI && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
     git clone --depth 1 https://github.com/bodaay/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader
 
