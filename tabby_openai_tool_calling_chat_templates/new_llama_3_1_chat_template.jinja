@@ -5,7 +5,9 @@ stop_strings are the tags that signal that the generation is complete
 Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 128008, 128009 should be the stop tokens
 {which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
 #}
-{%- set stop_strings = ["<|end_of_text|>", "<|eom_id|>", "<|eot_id|>", ".assistant\n\n", "assistantassistant"] -%}
+{%- set stop_strings = ["<|end_of_text|>", "<|eom_id|>", "<|eot_id|>"] -%}
+
+{%- set tool_stop_string = "<|eom_id|>" -%}
 
 {# Define the possible message roles #}
 {%- set message_roles = ['system', 'user', 'assistant', 'tool'] -%}
@@ -13,7 +15,6 @@ Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 
 {# Define the start identifier for the tool
 This lets us know when we should start parsing output as a tool call, and is sometimes unique to the model
 For Example: Grok tool calling: https://huggingface.co/Groq/Llama-3-Groq-70B-Tool-Use will place tool calls between <tool_call> and </tool_call> tags
-
 Grok Example:
 <tool_call>
     {"name": <function-name>,"arguments": <args-dict>}
@@ -35,9 +36,10 @@ EX: <|start_header_id|>user<|end_header_id|>
 {%- set start_header = "<|start_header_id|>" -%}
 {%- set end_header = "<|end_header_id|>\n" -%}
 
+{%- set initial_system_prompt = '
+Environment: ipython
 
-
-{%- set initial_system_prompt = '**# Task**  
+**# Task**  
 You are an AI assistant capable of responding to user queries directly or invoking external tools when necessary. Your goal is to provide accurate and useful responses based on the context. Use tools only when required and ensure all necessary parameters are provided. Otherwise, respond directly.
 
 ### **Decision-Making Criteria**  
@@ -123,7 +125,8 @@ I am retrieving the latest stock price for AAPL. Stock prices fluctuate frequent
 Read the user input and respond using tools if necessary as described above.' -%}
 
 {# Tool Reminder #}
-{%- set tool_reminder = '**## Available Tools**  
+{%- set tool_reminder = 'Environment: ipython
+**## Available Tools**  
 ' + tools_json + '
 
 **## Quick Reminder - Response Types**  
@@ -156,9 +159,7 @@ I\'m retrieving the latest weather information for New York.
 "Could you provide the location you\'d like to check the weather for?"  
 
 **Use this reminder as a reference for your response.**  ' -%}
-
 {# Template #}
-
 {%- for message in messages -%}
     {%- set role = message['role'] | lower -%}
     {%- if role not in message_roles -%}
@@ -178,8 +179,10 @@ I\'m retrieving the latest weather information for New York.
 {{ content }}
         {%- if 'tool_calls_json' in message and message['tool_calls_json'] -%}
 {{ tool_start }}{{ message['tool_calls_json']}}{{ tool_end }}
-        {%- endif -%}
+        {%- else -%}
 {{ eos_token }}
+        {%- endif -%}
+
 
     {%- endif -%}
 {%- endfor -%}
