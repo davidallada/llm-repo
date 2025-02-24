@@ -6,7 +6,7 @@ Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 
 {which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
 #}
 {%- set bos_token = "<|begin_of_text|>" -%}
-{%- set stop_strings = ["<|end_of_text|>", "<|eot_id|>", "<|eom_id|>"] -%}
+{%- set stop_strings = ["<|end_of_text|>", "<|eot_id|>", "<|eom_id|>", "assistantassistant", "assistant\n"] -%}
 {# Define the possible message roles #}
 {%- set message_roles = ['system', 'user', 'assistant', 'tool', 'ipython'] -%}
 {# Define the start identifier for the tool
@@ -31,9 +31,9 @@ EX: <|start_header_id|>user<|end_header_id|>
 #}
 {%- set start_header = "<|start_header_id|>" -%}
 {%- set end_header = "<|end_header_id|>" -%}
-{%- set tool_system_prompt = 'You are an expert in composing functions. You are given a question and a set of possible functions.
-Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
-If none of the functions can be used, point it out. If the given question lacks the parameters required by the function, also point it out. You should only return the function call in tools call sections.' -%}
+{%- set tool_system_prompt = 'You are an expert in composing functions. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
+If none of the function can be used, point it out. If the given question lacks the parameters required by the function, also point it out.
+You should only return the function call in tools call sections.' -%}
 {%- set tool_format_prompt = 'If you decide to invoke any of the function(s), you MUST put it in the format of ' + tool_start + '[{"function": {"name": func_name1, "arguments": {"params_name_1": params_value1 "params_name2": params_value2,...}}, "type": "function", "id": "tool_id_123"}, {func_definition2}]' + tool_end + '
 You SHOULD NOT include any other text in the response.
 You MUST include the `' + tool_start + '` and `' + tool_end + '` tags around the function calls.' -%}
