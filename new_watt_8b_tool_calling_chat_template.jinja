@@ -1,0 +1,193 @@
+{# Metadata #} 
+
+{#
+stop_strings are the tags that signal that the generation is complete
+Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 128008, 128009 should be the stop tokens
+{which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
+#}
+{%- set stop_strings = ["<|end_of_text|>", "<|eot_id|>", "<|eom_id|>", "assistantassistant", ".assistant\n"] -%}
+
+{# Define the possible message roles #}
+{%- set message_roles = ['system', 'user', 'assistant', 'tool'] -%}
+
+{# Define the start identifier for the tool
+This lets us know when we should start parsing output as a tool call, and is sometimes unique to the model
+For Example: Grok tool calling: https://huggingface.co/Groq/Llama-3-Groq-70B-Tool-Use will place tool calls between <tool_call> and </tool_call> tags
+Grok Example:
+<tool_call>
+    {"name": <function-name>,"arguments": <args-dict>}
+</tool_call>
+So we would set tool_start = "<tool_call>" and tool_end = "</tool_call>"
+
+Another Example is:
+Llama3 FireFunctionV2's](https://huggingface.co/fireworks-ai/llama-3-firefunction-v2) model expects only `functools` to start the call, without a `tool_end`
+#}
+{%- set tool_start = "<|tool_start|>" -%}
+{%- set tool_end = "<|tool_end|>" -%}
+
+{#
+start_header and end_header signify the start and ending strings that surround the "role".
+Here are examples for llama 3.1
+EX: <|start_header_id|>system<|end_header_id|>
+EX: <|start_header_id|>user<|end_header_id|>
+#}
+{%- set start_header = "<|start_header_id|>" -%}
+{%- set end_header = "<|end_header_id|>\n" -%}
+
+
+
+{# {{- bos_token }} #}
+{# {%- if custom_tools is defined %} #}
+{%- if tools_json is defined %}
+    {%- set tools = tools_json %}
+{%- endif %}
+{%- if not tools_in_user_message is defined %}
+    {# {%- set tools_in_user_message = true %} #}
+    {%- set tools_in_user_message = false %}
+{%- endif %}
+{%- if not date_string is defined %}
+    {%- set date_string = "26 Jul 2024" %} {# TODO: Make this the current datetime #}
+{%- endif %}
+{%- if not tools is defined %}
+    {%- set tools = none %}
+{%- endif %}
+{#- This block extracts the system message, so we can slot it into the right place. #}
+{%- if messages[0]['role'] == 'system' %}
+    {%- set system_message = messages[0]['content']|trim %}
+    {%- set messages = messages[1:] %}
+{%- else %}
+    {%- set system_message = "" %}
+{%- endif %}
+{#- System message + builtin tools #}
+{# {{- start_header + 'system' + end_header + '\n' }}
+{%- if builtin_tools is defined or tools is not none %}
+    {{- "Environment: ipython\n" }}
+{%- endif %}
+#}
+{%- if builtin_tools is defined %}
+    {{- "Tools: " + builtin_tools | reject('equalto', 'code_interpreter') | join(", ") + "\n\n"}}
+{%- endif %}
+{{- 'You are a helpful assistant with tool calling capabilities. When you receive a tool call response, use the output to format an answer to the original use question.' -}}
+{{- "Cutting Knowledge Date: December 2023\n" }}
+{{- "Today Date: " + date_string + "\n\n" }}
+{%- if tools is not none and not tools_in_user_message %}
+    {{- 'Given the following functions, please respond with a list of function call dictionaries in JSON format with its proper arguments that best answers the given prompt.
+Respond in the format: `' + tool_start + '[{"name": function name, "arguments": dictionary of argument names and their value}]' + tool_end + '`, note the tool start and end tags wrapping the list. Avoid variables.\n' }}
+    {% if tools is string %}
+        {{- tools }}{# above, we set tools = tools_json #}
+        {{- "\n\n" }}
+    {% else %}
+        {%- for t in tools %}
+            {{- t | tojson(indent=4) }}
+            {{- "\n\n" }}
+        {%- endfor %}
+    {% endif %}
+    {{- 'Tool Call Example:
+    ```
+    <|start_header_id|>user<|end_header_id|>
+    What is the weather like in New York, and did they win the football game?<|eot_id|>
+    <|start_header_id|>assistant<|end_header_id|>
+    ' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"}, "name": "get_weather"}, "type": "function"},{"id": "tool_id_1343","function": {"arguments": {"list": ["New York Jets", "New York Yankees"]}, "name": "get_football_score"}, "type": "function"}]' + tool_end + '
+    ```'-}}
+{%- endif %}
+{{- system_message }}
+{{- 'When you receive a tool call response, use the output to format an answer to the original user question. Strictly adhere to the tool definitions and the format of the tool calls, and call tools to solve the problem. You MUST enclose the function call list within the ' + tool_start + ' and ' + tool_end + ' tags.
+
+You are a helpful assistant with tool calling capabilities.' -}}
+{{- "<|eot_id|>" }}
+{#- Custom tools are passed in a user message with some extra guidance #}
+{%- if tools_in_user_message and not tools is none %}
+    {#- Extract the first user message so we can plug it in here #}
+    {%- if messages | length != 0 %}
+        {%- set first_user_message = messages[0]['content']|trim %}
+        {%- set messages = messages[1:] %}
+    {%- else %}
+        {{- raise_exception("Cannot put tools in the first user message when there's no first user message!") }}
+{%- endif %}
+    {{- '<|start_header_id|>user<|end_header_id|>\n\n' -}}
+    {{- 'Given the following functions, please respond with a list of function call dictionaries in JSON format with its proper arguments that best answers the given prompt.
+Respond in the format: `' + tool_start + '[{"name": function name, "arguments": dictionary of argument names and their value}]' + tool_end + '`, note the tool start and end tags wrapping the list. Avoid variables.\n' }}
+    {% if tools is string %}
+        {{- tools }}{# above, we set tools = tools_json #}
+        {{- "\n\n" }}
+    {% else %}
+        {%- for t in tools %}
+            {{- t | tojson(indent=4) }}
+            {{- "\n\n" }}
+        {%- endfor %}
+    {% endif %}
+    {{- 'Tool Call Example:
+    ```
+    <|start_header_id|>user<|end_header_id|>
+    What is the weather like in New York, and did they win the football game?<|eot_id|>
+    <|start_header_id|>assistant<|end_header_id|>
+    ' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"}, "name": "get_weather"}, "type": "function"},{"id": "tool_id_1343","function": {"arguments": {"list": ["New York Jets", "New York Yankees"]}, "name": "get_football_score"}, "type": "function"}]' + tool_end + '
+    ```' -}}
+    {{- first_user_message + "<|eot_id|>"}}
+{%- endif %}
+{%- for message in messages %}
+    {%- if not (message.role == 'ipython' or message.role == 'tool' or 'tool_calls' in message) %}
+        {{- start_header + message['role'] + end_header + '\n'+ message['content'] | trim + '<|eot_id|>' }}
+    {%- elif 'tool_calls' in message %}
+        {# {%- if not message.tool_calls|length == 1 %}
+             {{- raise_exception("This model only supports single tool-calls at once!") }}
+        {%- endif %} #}
+        {%- set tool_call = message.tool_calls[0].function %}
+        {# {%- if builtin_tools is defined and tool_call.name in builtin_tools %}
+            {{- '<|start_header_id|>assistant<|end_header_id|>\n\n' -}}
+            {{- "<|python_tag|>" + tool_call.name + ".call(" }}
+            {%- for arg_name, arg_val in tool_call.arguments | items %}
+                {{- arg_name + '="' + arg_val + '"' }}
+                {%- if not loop.last %}
+                    {{- ", " }}
+                {%- endif %}
+            {%- endfor %}
+            {{- ")" }}
+        {%- else  %}
+            {{- '<|start_header_id|>assistant<|end_header_id|>\n\n' -}}
+            {{- '{"name": "' + tool_call.name + '", ' }}
+            {{- '"parameters": ' }}
+            {{- tool_call.arguments }}
+            {{- tool_call.arguments | tojson }}
+            {{- "}" }}
+        {%- endif %} #}
+        {{- start_header + 'assistant' + end_header + '\n' -}}
+        {{- message.tool_calls | tojson(indent=4) }}
+        {{- "\n" }}
+        {%- if builtin_tools is defined %}
+            {#- This means we're in ipython mode #}
+            {{- "<|eom_id|>" }}
+        {%- else %}
+            {{- "<|eot_id|>" }}
+        {%- endif %}
+    {%- elif message.role == "tool" or message.role == "ipython" %}
+        {{- "<|start_header_id|>tool<|end_header_id|>\n\n" }}
+        {%- if message.content is mapping or message.content is iterable %}
+            {{- message.content | tojson }}
+        {%- else %}
+            {{- message.content }}
+        {%- endif %}
+        {{- "<|eot_id|>" }}
+    {%- endif %}
+{%- endfor %}
+{# {%- if add_generation_prompt %}
+    {{- '<|start_header_id|>assistant<|end_header_id|>\n\n' }}
+{%- endif %}
+#}
+
+{%- set tool_reminder = 'Given the following functions, please respond with a list of function call dictionaries in JSON format with its proper arguments that best answers the given prompt.
+Respond in the format: `' + tool_start + '[{"name": function name, "arguments": dictionary of argument names and their value}]' + tool_end + '`, note the tool start and end tags wrapping the list. Avoid variables.\nHere are your Tools:\n' + tools + '\n\nTool Call Example:
+    ```
+    user:
+    What is the weather like in New York, and did they win the football game?<|eot_id|>
+    assistant:
+    ' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"}, "name": "get_weather"}, "type": "function"},{"id": "tool_id_1343","function": {"arguments": {"list": ["New York Jets", "New York Yankees"]}, "name": "get_football_score"}, "type": "function"}]' + tool_end + '
+    ```\n\nYou MUST enclose the function call list within the ' + tool_start + ' and ' + tool_end + ' tags. Strictly adhere to the tool definitions.'  -%}
+{%- if tool_precursor -%}
+    {{ start_header }}system{{ end_header }}
+    {{ tool_reminder }}{{ eos_token }}
+    {{ start_header }}assistant{{ end_header }}
+    {{ tool_precursor }}{{ tool_start }}
+{%- else -%}
+    {{ start_header }}assistant{{ end_header }}
+{%- endif -%}
