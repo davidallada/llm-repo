@@ -54,7 +54,7 @@ You MUST include the `' + tool_start + '` and `' + tool_end + '` tags around the
 {%- endif %}
 {# Template #}
 {%- set tool_reminder = tool_format_prompt + '\n\nHere is a list of functions in JSON format that you can invoke.\n\n' + tools + '\n\n' -%}
-{{- bos_token }}
+{# {{- bos_token }} #}
 {#
 {%- if custom_tools is defined %}
     {%- set tools = custom_tools %}
