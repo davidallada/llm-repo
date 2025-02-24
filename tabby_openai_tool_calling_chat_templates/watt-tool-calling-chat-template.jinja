@@ -192,5 +192,7 @@ You MUST include the `' + tool_start + '` and `' + tool_end + '` tags around the
     {{ start_header }}assistant{{ end_header }}
     {{ tool_precursor }}{{ tool_start }}
 {%- else -%}
-    {{- start_header + 'assistant' + end_header + '\n\n' }}
+    {%- if add_generation_prompt %}
+        {{- start_header + 'assistant' + end_header + '\n\n' }}
+    {%- endif %}
 {%- endif -%}
