@@ -158,7 +158,12 @@ You MUST include the `' + tool_start + '` and `' + tool_end + '` tags around the
         {%- endif %}
         #}
         {{- start_header + 'assistant' + end_header + '\n\n' -}}
-        {{- '[' + message.tool_calls | map('model_dump') | map('tojson') | join(", ") + ']' -}}
+        {{- '[' -}}
+        {%- for tool_call in message.tool_calls -%}
+            {{ tool_call.model_dump() | tojson }}
+            {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+        {{- ']' -}}
         {%- if builtin_tools is defined %}
             {#- This means we're in ipython mode #}
             {{- "<|eom_id|>" }}
