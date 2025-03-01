@@ -5,6 +5,8 @@ stop_strings are the tags that signal that the generation is complete
 Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 128008, 128009 should be the stop tokens
 {which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
 #}
+{%- set skip_bos_token = true -%}
+{%- set tool_class_name = "Qwen2_5_FunctionHandler" -%}
 {%- set stop_strings = ["<|im_end|>", "<|endoftext|>"] -%}
 {# Define the possible message roles #}
 {%- set message_roles = ['system', 'user', 'assistant', 'tool'] -%}
@@ -29,12 +31,19 @@ EX: <|start_header_id|>system<|end_header_id|>
 EX: <|start_header_id|>user<|end_header_id|>
 #}
 {%- set start_header = "<|im_start|>" -%}
+{%- set end_header = "\n" -%}
 {#
 Qwen 2.5 doesnt have a end header nor a bos_token :)
 {%- set end_header = "<|end_header_id|>" -%}
 #}
+{% set tool_reminder = "# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" %}
+{% for tool in tools %}
+    {% set tool_reminder = tool_reminder + "\n" + (tool | tojson) %}
+{% endfor %}
+{% set tool_reminder = tool_reminder + "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n" %}
+
 {# Template #}
-{%- if tools_json %}
+{%- if tools %}
     {{- '<|im_start|>system\n' }}
     {%- if messages[0]['role'] == 'system' %}
         {{- messages[0]['content'] }}
@@ -42,7 +51,10 @@ Qwen 2.5 doesnt have a end header nor a bos_token :)
         {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}
     {%- endif %}
     {{- "\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
-    {{- tools_json -}}
+    {%- for tool in tools %}
+        {{- "\n" }}
+        {{- tool | tojson }}
+    {%- endfor %}
     {{- "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call><|im_end|>\n" }}
 {%- else %}
     {%- if messages[0]['role'] == 'system' %}
