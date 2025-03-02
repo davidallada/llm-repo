@@ -22,6 +22,7 @@ services:
       - apt-cache:/cache/apt
       - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-gpu-clone/model_directories:/app/model_directories
+      # - /mnt/docker_data/llm-gpu-clone/tabby_logs:/var/log/tabbyapi/
     command: exit
 
   tabbyapi:
@@ -43,6 +44,7 @@ services:
     volumes:
       - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-gpu-clone/model_directories/primary:/app/model_directories
+      - /mnt/docker_data/llm-gpu-clone/tabby_logs/primary:/var/log/tabbyapi
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
       interval: 30s
@@ -82,6 +84,34 @@ services:
     volumes:
       - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
       - /mnt/docker_data/llm-gpu-clone/model_directories/secondary:/app/model_directories
+      - /mnt/docker_data/llm-gpu-clone/tabby_logs/secondary:/var/log/tabbyapi
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  tabbyapi-dev:
+    restart: always
+    extends:
+      service: tabbyapi-base
+    ports:
+      - "5003:5000"
+      - "8079:8888"
+    command: embeddings_only
+    environment:
+      - TABBY_LOG_LEVEL=DEBUG
+      - NAME=TabbyAPI
+      - CUDA_VISIBLE_DEVICES=GPU-da6c157e-0c5f-0968-a088-185d90537446
+      - GGUF_STORAGE_DIR=/mnt/exllamav2/gguf
+      - EXL2_STORAGE_DIR=/mnt/exllamav2/exl2
+      - MEASUREMENT_JSON_DIR=/mnt/exllamav2/measurement_json
+      - MODEL_LOAD_FILE=/app/tabby_data/alt_tabby_model_load_config.json
+    volumes:
+      - /mnt/docker_data/llm-gpu-clone/tabby_data:/app/tabby_data
+      - /mnt/docker_data/llm-gpu-clone/model_directories/secondary:/app/model_directories
+      - /home/serveradmin/tabbyAPI:/app/tabbyAPI
+      - /mnt/docker_data/llm-gpu-clone/tabby_logs/dev:/var/log/tabbyapi
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
       interval: 30s
