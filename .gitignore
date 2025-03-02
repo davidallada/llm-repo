@@ -9,3 +9,8 @@ api_tokens.yml
 models/**
 
 model_directories/**
+
+/.*
+/tabby_logs/*
+!.gitignore
+!.git
