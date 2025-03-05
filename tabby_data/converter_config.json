@@ -5,6 +5,10 @@
             "bpw": []
         },
         {
+            "model_name": "Qwen/QwQ-32B",
+            "bpw": [5.2, 5.5, 6.0, 6.5, 8.0]
+        },
+        {
             "model_name": "Qwen/Qwen2.5-VL-72B-Instruct",
             "bpw": [4.0, 4.5, 5.2]
         },
