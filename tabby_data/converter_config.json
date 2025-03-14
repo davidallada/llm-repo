@@ -9,6 +9,10 @@
             "bpw": []
         },
         {
+            "model_name": "InfiniAILab/QwQ-0.5B",
+            "bpw": [5.2, 5.5, 6.0, 6.5, 8.0]
+        },
+        {
             "model_name": "Qwen/QwQ-32B",
             "bpw": [5.2, 5.5, 6.0, 6.5, 8.0]
         },
