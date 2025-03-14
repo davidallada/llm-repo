@@ -1,7 +1,7 @@
 {
     "model_configs": [
         {
-            "pretty_model_name": "Qwen/QwQ-32B Draft",
+            "pretty_model_name": "QwenQwQ-32B Draft",
             "model_name": "Qwen_QwQ-32B-8.0-bpw",
             "draft_model": "InfiniAILab_QwQ-0.5B-8.0-bpw",
             "tabby_config": {
