@@ -1,0 +1,59 @@
+PromptTemplate (loading): common/templating.py
+    - Loading:
+        - First: tabby_template.jinja (in model dir)
+        - chat_template.json (chat_template key)
+        - tokenizer_config.json (chat_template key)
+    - Attempts to load in a few ways. Given a path:
+        - adds .jinja if it doenst end with it
+        - tries to get the name without .jinja
+        - from_model_json:
+    - parses stop_strings, tool_start, and tool_start_token (just the int of the tool_start)
+    - sets strftime_now
+    - if request tool_call_start is None, set tool_call_start to template_metadata.tool_starts
+
+router.py
+    * def apply_chat_template
+        - parses these values
+        {
+            "add_generation_prompt": data.add_generation_prompt,
+            "tools_json": json.dumps(data.model_dump()["tools"], indent=2),
+            "functions_json": json.dumps(data.functions, indent=2),
+            "tool_precursor": tool_precursor,
+        }
+        * def format_messages_with_template
+            - For each message:
+                - set tool_calls_json to json.dumps(message.tool_calls)
+            - render with the template vars
+    - If response_format.type == "json", set data.json_schema: type: object
+    * generate_chat_completion (prompt, embeddings, data, request, model_path)
+        * Loop data.n times (n generations???) and call model.generate()
+            - at first, generations is empty list
+            * calls generate_gen
+                - parse all the options from the request
+                - parse the json schema: ExLlamaV2Grammar.add_json_schema_filter
+                    - must follow this format: https://json-schema.org/draft-07/schema#
+            - ExLlamaV2DynamicJobAsync
+                - runs the generation, for each result
+                    - gets eos_reason
+                        - max_new_tokens = length
+                        - otherwise stop
+                            - if eos_reason == stop_token, stop_str == eos_triggering_token_str else eos_triggering_string
+                - yields result
+        - loop through the 
+        - if we specify tool_call_start (or the chat template metadata tool_starts), execute special generate_tool_calls
+        * generate_tool_calls
+            - for each generation
+                - checks stop_str in tool_data.tool_call_start
+                    - for non-streaming, if text in gen means all gens will have text they generated
+                    - apply_chat_template with the tool_precursor=gen["text"] - this inserts the formatting
+            - sets generations[idx]["tool_calls"] = text of generation
+        * _create_response
+            - for each generation
+                - create a ChatCompletionMessage (ONLY ALLOWS role=assistant)
+                - set tool_calls = generation["tool_calls"], process
+                    * postprocess_tool_call
+                        - - calls jons.loads on the tool_calls
+                        - for each tool call
+                            - sets the tool_call["function"]["arguments"] to the json dumps of the arguments
+                            - Returns a ToolCall object
+                - Create a ChatCompletionRespChoice with finish_reason and stop_string

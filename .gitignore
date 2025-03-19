@@ -1,0 +1,16 @@
+# Ignore api_tokens.yml in the tabby_data directory
+tabby_data/api_tokens.yml
+
+# Keep the existing entries
+tabby_data/.tabby_env
+
+# Add any other entries you want to ignore
+api_tokens.yml
+models/**
+
+model_directories/**
+
+/.*
+/tabby_logs/*
+!.gitignore
+!.git

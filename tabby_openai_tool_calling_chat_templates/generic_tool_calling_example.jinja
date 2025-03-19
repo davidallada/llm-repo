@@ -1,0 +1,133 @@
+{# Metadata #} 
+
+{#
+stop_strings are the tags that signal that the generation is complete
+Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 128008, 128009 should be the stop tokens
+{which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
+#}
+{%- set stop_strings = ["<|im_start|>", "<|im_end|>"] -%}
+
+{# Define the possible message roles #}
+{%- set message_roles = ['system', 'user', 'assistant', 'tool'] -%}
+
+{# Define the start identifier for the tool
+This lets us know when we should start parsing output as a tool call, and is sometimes unique to the model
+For Example: Grok tool calling: https://huggingface.co/Groq/Llama-3-Groq-70B-Tool-Use will place tool calls between <tool_call> and </tool_call> tags
+
+Grok Example:
+<tool_call>
+    {"name": <function-name>,"arguments": <args-dict>}
+</tool_call>
+So we would set tool_start = "<tool_call>" and tool_end = "</tool_call>"
+
+Another Example is:
+Llama3 FireFunctionV2's](https://huggingface.co/fireworks-ai/llama-3-firefunction-v2) model expects only `functools` to start the call, without a `tool_end`
+#}
+{%- set tool_start = "<|tool_start|>" -%}
+{%- set tool_end = "<|tool_end|>" -%}
+
+{#
+start_header and end_header signify the start and ending strings that surround the "role".
+Here are examples for llama 3.1
+EX: <|start_header_id|>system<|end_header_id|>
+EX: <|start_header_id|>user<|end_header_id|>
+#}
+{%- set start_header = "<|start_header_id|>" -%}
+{%- set end_header = "<|end_header_id|>\n" -%}
+
+{#
+This allows multiple tool calls to be produced. If your model only supports single tool calls (like llama 3.1),
+then set this to false.
+*NOTE* That the tabbyapi parser ALWAYS expects a list of JSON dicts, so even if you only have one tool call, it must be in a list
+#}
+{%- set multi_tool_call = true -%}
+
+{%- if multi_tool_call -%}
+    {%- set example_tool_call = '[
+        {
+            "id": "tool_id_1342",
+            "function": {
+                "arguments": "arg_name": 3,
+                "name": "tool_name"
+            },
+            "type": "function"
+        },
+        {
+            "id": "example_id_13f42",
+            "function": {
+                "arguments": "example_arg": 1.0, "another_example_arg": true,
+                "name": "another_tool_name"
+            },
+            "type": "function"
+        }
+    ]\n' -%}
+    {%- set variable_instructions = '4. Generate all calls using the following json tool call format. Here is a multi tool call example:\n' + tool_start + example_tool_call + tool_end -%}
+{%- else -%}
+    {%- set example_tool_call = '[
+        {
+            "id": "tool_id_1342",
+            "function": {
+                "arguments": "arg_name": 3,
+                "name": "tool_name"
+            },
+            "type": "function"
+        }
+    ]\n' -%}
+    {%- set variable_instructions = '4. You MUST only generate ONE tool call at a time.\n5. Generate all calls using the following json tool call format. Here is a tool call example:\n' + tool_start + example_tool_call + tool_end -%}
+{%- endif -%}
+
+
+{%- set initial_system_prompt = 'You are an assistant that has access to the following set of tools, to call a tool:
+1. Prefix calls with ' + tool_start + ' and end calls with ' + tool_end + '
+2. Ensure you use the correct type for arguments. For example, if the argument is a string, ensure it is enclosed in quotes, otherwise, it should not be.
+3. ALWAYS generate a LIST [] of tool calls, even if the list only contains a single tool call. Enclose the tool calls in [ and ].
+' + variable_instructions + '
+
+Here are the tools available for you to call:
+' + tools_json -%}
+
+{%- set tool_reminder = 'Available Tools:
+' + tools_json + '
+
+Tool Call Format Example:
+' + tool_start + example_tool_call + tool_end + '
+
+Prefix & Suffix: Begin tool calls with ' + tool_start + ' and end with ' + tool_end + '.
+Argument Types: Use correct data types for arguments (e.g., strings in quotes, numbers without).' -%}
+
+{# Template #}
+
+{%- for message in messages -%}
+    {%- set role = message['role'] | lower -%}
+    {%- if role not in message_roles -%}
+        {{ raise_exception('Invalid role ' + message['role'] + '. Only ' + message_roles | join(', ') + ' are supported.') }}
+    {%- endif -%}
+
+    {%- set content = message['content'] if message['content'] is defined else '' | trim -%}
+    {%- if loop.first -%}
+{{ bos_token }}{{ start_header }}{{ role }}{{ end_header }}
+{{ initial_system_prompt }}
+
+{{ content }}{{ eos_token }}
+    {%- endif -%}
+
+    {%- if not loop.first -%}
+{{ start_header }}{{ role }}{{ end_header }}
+{{ content }}
+        {%- if 'tool_calls_json' in message and message['tool_calls_json'] -%}
+{{ tool_start }}{{ message['tool_calls_json']}}{{ tool_end }}
+        {%- endif -%}
+{{ eos_token }}
+
+    {%- endif -%}
+{%- endfor -%}
+
+{%- if tool_precursor -%}
+{{ start_header }}system{{ end_header }}
+{{ tool_reminder }}{{ eos_token }}
+{{ start_header }}assistant{{ end_header }}
+{{ tool_precursor }}{{ tool_start }}
+{%- else -%}
+{{ start_header }}assistant{{ end_header }}
+{%- endif -%}
+

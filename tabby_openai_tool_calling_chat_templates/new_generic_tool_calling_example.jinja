@@ -1,0 +1,200 @@
+{# Metadata #} 
+
+{#
+stop_strings are the tags that signal that the generation is complete
+Ex in llama 3.1, we can find the generation_config and see that 128000, 128001, 128008, 128009 should be the stop tokens
+{which are "<|begin_of_text|>", "<|end_of_text|>", "<|eom_id|>", and "<|eot_id|>"
+#}
+{%- set stop_strings = ["<|im_start|>", "<|im_end|>"] -%}
+
+{# Define the possible message roles #}
+{%- set message_roles = ['system', 'user', 'assistant', 'tool'] -%}
+
+{# Define the start identifier for the tool
+This lets us know when we should start parsing output as a tool call, and is sometimes unique to the model
+For Example: Grok tool calling: https://huggingface.co/Groq/Llama-3-Groq-70B-Tool-Use will place tool calls between <tool_call> and </tool_call> tags
+
+Grok Example:
+<tool_call>
+    {"name": <function-name>,"arguments": <args-dict>}
+</tool_call>
+So we would set tool_start = "<tool_call>" and tool_end = "</tool_call>"
+
+Another Example is:
+Llama3 FireFunctionV2's](https://huggingface.co/fireworks-ai/llama-3-firefunction-v2) model expects only `functools` to start the call, without a `tool_end`
+#}
+{%- set tool_start = "<|tool_start|>" -%}
+{%- set tool_end = "<|tool_end|>" -%}
+
+{#
+start_header and end_header signify the start and ending strings that surround the "role".
+Here are examples for llama 3.1
+EX: <|start_header_id|>system<|end_header_id|>
+EX: <|start_header_id|>user<|end_header_id|>
+#}
+{%- set start_header = "<|start_header_id|>" -%}
+{%- set end_header = "<|end_header_id|>\n" -%}
+
+{#
+This allows multiple tool calls to be produced. If your model only supports single tool calls (like llama 3.1),
+then set this to false.
+*NOTE* That the tabbyapi parser ALWAYS expects a list of JSON dicts, so even if you only have one tool call, it must be in a list
+#}
+{%- set multi_tool_call = true -%}
+
+
+{%- set initial_system_prompt = '**# Task**  
+You are an AI assistant capable of responding to user queries directly or invoking external tools when necessary. Your goal is to provide accurate and useful responses based on the context. Use tools only when required and ensure all necessary parameters are provided. Otherwise, respond directly.
+
+### **Decision-Making Criteria**  
+When deciding how to respond, evaluate:  
+1. **The user query**: What does the user need?  
+2. **Available tools**: What tools are available, and what are their functions and required arguments?  
+3. **Argument completeness**: Are all required arguments available to call a tool?  
+
+### **Rules for Tool Usage**  
+1. **Use a tool only if**:  
+   - It is necessary to fulfill the user\'s request.  
+   - All required arguments are available.  
+   - If arguments are missing, respond naturally and ask the user for clarification.  
+2. **Respond directly** if no tool is needed.  
+3. **Call multiple tools** only when relevant and necessary.  
+4. **Provide additional context or explanation** after a tool call if it helps clarify the response.  
+
+### **Special Token Usage for Tool Calls**  
+- **Start a tool call with `' + tool_start + '`**.  
+- **End a tool call with `' + tool_end + '`** (optional, but recommended if additional explanation is needed).  
+- **Return only a structured JSON list** inside the `' + tool_start + '` block.  
+- **Place additional explanations** after `' + tool_end + '` in normal text format.  
+
+### **Response Formats**  
+
+#### **1. Normal Response (No Tool Call)**  
+- Respond naturally and conversationally.  
+- Do not include special tokens.  
+
+**Example:**  
+**User:** "What is the capital of France?"  
+**Assistant:** "The capital of France is Paris."  
+
+#### **2. Tool Call (Using Special Tokens)**  
+- Wrap the tool call inside `' + tool_start + '` and `' + tool_end + '`.  
+- Return a structured JSON list of tool calls.  
+
+**Format:**  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"arg_name": "value"},"name": "tool_name"},"type": "function"}]' + tool_end + '
+Optional additional explanation or follow-up
+```
+
+### **Examples**  
+
+#### **Example 1: Single Tool Invocation**  
+**User:** "Check the weather in New York."  
+**Assistant:**  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"},"name": "get_weather"},"type": "function"}]' + tool_end + '
+```
+---
+#### **Example 2: Multiple Tool Calls**  
+**User:** "Check the weather in New York and get the current time there."  
+**Assistant:**  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"},"name": "get_weather"},"type": "function"},{"id": "tool_id_1343","function": {"arguments": {"location": "New York"},"name": "get_time"},"type": "function"}]' + tool_end + '
+```
+
+#### **Example 3: Tool Call with Additional Context**  
+- After the additional context, end with "\n\n"
+**User:** "Check the stock price of AAPL."  
+**Assistant:**  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"symbol": "AAPL"},"name": "get_stock_price"},"type": "function"}]' + tool_end + '
+I am retrieving the latest stock price for AAPL. Stock prices fluctuate frequently, so the value may change in real-time.\n\n
+```
+
+#### **Example 4: Missing Required Arguments (No Tool Call)**  
+**User:** "Check the weather."  
+**Assistant:** "Could you specify the location you\'d like the weather for?"  
+
+### **General Tool-Calling Rules**  
+1. **Only invoke tools if all required parameters are available.**  
+2. **Call multiple tools if necessary**, but only when relevant.  
+3. **Follow the response format strictly** when using `' + tool_start + '` and `' + tool_end + '`.  
+4. **Respond normally if no tool is required.**  
+5. **Do not fabricate tool responses**; only return tool calls with valid parameters.  
+
+### **Available Tools**  
+' + tools_json + '
+
+Read the user input and respond using tools if necessary as described above.' -%}
+
+{# Tool Reminder #}
+{%- set tool_reminder = '**## Available Tools**  
+' + tools_json + '
+
+**## Quick Reminder - Response Types**  
+
+1. **Tool Call Only**:  
+   - Return only the structured tool call inside `' + tool_start + '` and `' + tool_end + '` tokens.  
+
+2. **Tool Call with Context**:  
+   - Return the tool call inside `' + tool_start + '` and `' + tool_end + '` tokens, followed by an explanation outside the tokens.  
+
+3. **Just Context**:  
+   - Respond naturally without special tokens.  
+
+**## Examples**  
+
+**User:** "Check the weather in New York."  
+
+**1. Tool Call Only**:  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"},"name": "get_weather"},"type": "function"}]' + tool_end + '
+```
+
+**2. Tool Call with Context**:  
+```
+' + tool_start + '[{"id": "tool_id_1342","function": {"arguments": {"location": "New York"},"name": "get_weather"},"type": "function"}]' + tool_end + '
+I\'m retrieving the latest weather information for New York.
+```
+
+**3. Just Context**:  
+"Could you provide the location you\'d like to check the weather for?"  
+
+**Use this reminder as a reference for your response.**  ' -%}
+
+{# Template #}
+
+{%- for message in messages -%}
+    {%- set role = message['role'] | lower -%}
+    {%- if role not in message_roles -%}
+        {{ raise_exception('Invalid role ' + message['role'] + '. Only ' + message_roles | join(', ') + ' are supported.') }}
+    {%- endif -%}
+
+    {%- set content = message['content'] if message['content'] is defined else '' | trim -%}
+    {%- if loop.first -%}
+{{ bos_token }}{{ start_header }}{{ role }}{{ end_header }}
+{{ initial_system_prompt }}
+
+{{ content }}{{ eos_token }}
+    {%- endif -%}
+
+    {%- if not loop.first -%}
+{{ start_header }}{{ role }}{{ end_header }}
+{{ content }}
+        {%- if 'tool_calls_json' in message and message['tool_calls_json'] -%}
+{{ tool_start }}{{ message['tool_calls_json']}}{{ tool_end }}
+        {%- endif -%}
+{{ eos_token }}
+
+    {%- endif -%}
+{%- endfor -%}
+
+{%- if tool_precursor -%}
+{{ start_header }}system{{ end_header }}
+{{ tool_reminder }}{{ eos_token }}
+{{ start_header }}assistant{{ end_header }}
+{{ tool_precursor }}{{ tool_start }}
+{%- else -%}
+{{ start_header }}assistant{{ end_header }}
+{%- endif -%}
