@@ -9,6 +9,10 @@
             "bpw": []
         },
         {
+            "model_name": "nvidia/Llama-3_3-Nemotron-Super-49B-v1",
+            "bpw": [5.2, 6.0]
+        },
+        {
             "model_name": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
             "bpw": [5.2, 8.0]
         },
