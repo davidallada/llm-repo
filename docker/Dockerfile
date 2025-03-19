@@ -3,14 +3,6 @@
 # Set a default value for VERSION
 ARG VERSION=debug
 
-# For development, we can specify a different repo or branch
-ARG TABBY_API_REPO=https://github.com/theroyallab/tabbyAPI
-ARG TABBY_API_BRANCH=
-
-# Convert ARG to ENV so it persists in RUN
-ENV TABBY_API_REPO=${TABBY_API_REPO}
-ENV TABBY_API_BRANCH=${TABBY_API_BRANCH}
-
 # Stage 1: Build environment
 FROM nvidia/cuda:12.4.1-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
 
@@ -61,6 +53,14 @@ RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
 #     else \
 #         git clone -b "$TABBY_API_BRANCH" "$TABBY_API_REPO" /app/tabbyAPI; \
 #     fi
+
+# For development, we can specify a different repo or branch
+ARG TABBY_API_REPO=https://github.com/theroyallab/tabbyAPI
+ARG TABBY_API_BRANCH=
+
+# Convert ARG to ENV so it persists in RUN
+ENV TABBY_API_REPO=${TABBY_API_REPO}
+ENV TABBY_API_BRANCH=${TABBY_API_BRANCH}
 
 RUN git clone https://github.com/turboderp/exllamav2 /app/exllamav2 && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
