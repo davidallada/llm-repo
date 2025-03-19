@@ -7,6 +7,9 @@ ARG VERSION=debug
 ARG TABBY_API_REPO=https://github.com/theroyallab/tabbyAPI
 ARG TABBY_API_BRANCH=
 
+# Convert ARG to ENV so it persists in RUN
+ENV TABBY_API_REPO=${TABBY_API_REPO}
+ENV TABBY_API_BRANCH=${TABBY_API_BRANCH}
 
 # Stage 1: Build environment
 FROM nvidia/cuda:12.4.1-devel-ubuntu20.04 AS tabbyapi-exllamav2-builder-image
@@ -59,14 +62,13 @@ RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
 #         git clone -b "$TABBY_API_BRANCH" "$TABBY_API_REPO" /app/tabbyAPI; \
 #     fi
 
-# Clone all repositories, including the optional branch for TabbyAPI
 RUN git clone https://github.com/turboderp/exllamav2 /app/exllamav2 && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
     git clone --depth 1 https://github.com/bodaay/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader && \
-    if [ -z "${TABBY_API_BRANCH}" ]; then \
-        git clone "${TABBY_API_REPO}" /app/tabbyAPI; \
+    if [ -z "$TABBY_API_BRANCH" ]; then \
+        git clone "$TABBY_API_REPO" /app/tabbyAPI; \
     else \
-        git clone -b "${TABBY_API_BRANCH}" "${TABBY_API_REPO}" /app/tabbyAPI; \
+        git clone -b "$TABBY_API_BRANCH" "$TABBY_API_REPO" /app/tabbyAPI; \
     fi
 
 # Create virtual environment in /venv
