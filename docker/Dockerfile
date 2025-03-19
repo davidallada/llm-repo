@@ -63,11 +63,10 @@ RUN mkdir -p /tmp && chmod 1777 /tmp && apt-get update && \
 RUN git clone https://github.com/turboderp/exllamav2 /app/exllamav2 && \
     git clone --depth 1 https://github.com/turboderp/exui /app/exui && \
     git clone --depth 1 https://github.com/bodaay/HuggingFaceModelDownloader /app/HuggingFaceModelDownloader && \
-    export TABBY_API_REPO="$TABBY_API_REPO" TABBY_API_BRANCH="$TABBY_API_BRANCH" && \
-    if [ -z "$TABBY_API_BRANCH" ]; then \
-        git clone "$TABBY_API_REPO" /app/tabbyAPI; \
+    if [ -z "${TABBY_API_BRANCH}" ]; then \
+        git clone "${TABBY_API_REPO}" /app/tabbyAPI; \
     else \
-        git clone -b "$TABBY_API_BRANCH" "$TABBY_API_REPO" /app/tabbyAPI; \
+        git clone -b "${TABBY_API_BRANCH}" "${TABBY_API_REPO}" /app/tabbyAPI; \
     fi
 
 # Create virtual environment in /venv
