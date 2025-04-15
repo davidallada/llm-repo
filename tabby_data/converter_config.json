@@ -225,6 +225,10 @@
             "bpw": [5.2, 8.0]
         },
         {
+            "model_name": "nvidia/Llama-3.1-Nemotron-Nano-8B-v1",
+            "bpw": [5.2, 8.0]
+        },
+        {
             "model_name": "deepseek-ai/DeepSeek-V3",
             "bpw": []
         },
