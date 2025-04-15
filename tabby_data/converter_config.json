@@ -213,6 +213,18 @@
             "bpw": [4.0, 5.2, 6.0, 8.0]
         },
         {
+            "model_name": "nvidia/Llama-3.1-8B-UltraLong-1M-Instruct",
+            "bpw": [5.2, 8.0]
+        },
+        {
+            "model_name": "nvidia/Llama-3.1-8B-UltraLong-2M-Instruct",
+            "bpw": [5.2, 8.0]
+        },
+        {
+            "model_name": "nvidia/Llama-3.1-8B-UltraLong-4M-Instruct",
+            "bpw": [5.2, 8.0]
+        },
+        {
             "model_name": "deepseek-ai/DeepSeek-V3",
             "bpw": []
         },
