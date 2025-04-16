@@ -155,7 +155,7 @@ draft_model:
   # Rope scale for draft models (default: 1.0).
   # Same as compress_pos_emb.
   # Use if the draft model was trained on long context with rope.
-  draft_rope_scale: 1.0
+  draft_rope_scale:
 
   # Rope alpha for draft models (default: None).
   # Same as alpha_value. Set to "auto" to auto-calculate.
