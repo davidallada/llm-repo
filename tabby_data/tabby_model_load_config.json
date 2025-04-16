@@ -10,69 +10,6 @@
             "comment": ""
         },
         {
-            "pretty_model_name": "Watt-70B-Tool-Use",
-            "model_name": "watt-ai_watt-tool-70B-5.2-bpw",
-            "draft_model": "watt-ai_watt-tool-8B-5.2-bpw",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": ""
-        },
-        {
-            "pretty_model_name": "QwQ-32B 5.2 BPW",
-            "model_name": "Qwen_QwQ-32B-5.2-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": ""
-        },
-        {
-            "pretty_model_name": "QwQ-32B 8.0 BPW",
-            "model_name": "Qwen_QwQ-32B-8.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": ""
-        },
-        {
-            "pretty_model_name": "Watt-8B-Tool-Use-32k",
-            "model_name": "watt-ai_watt-tool-8B-8.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": ""
-        },
-        {
-            "pretty_model_name": "Watt-8B-Tool-Use-132k",
-            "model_name": "watt-ai_watt-tool-8B-8.0-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 131072
-            },
-            "comment": ""
-        },
-        {
-            "pretty_model_name": "Qwen 2.5-14B 500k-5.2 BPW",
-            "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-5.2-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 503808
-            },
-            "comment": "60 GB VRAM Required (3x4090)"
-        },
-        {
-            "pretty_model_name": "Qwen-2.5-7B-1M-5.2 BPW",
-            "model_name": "Qwen_Qwen2.5-7B-Instruct-1M-5.2-bpw",
-            "draft_model": "",
-            "tabby_config": {
-                "max_seq_len": 999424
-            },
-            "comment": "36 GB VRAM Required (2x4090)"
-        },
-        {
             "pretty_model_name": "Qwen2.5-Coder-32B-daily-6.5bpw-100k",
             "model_name": "Qwen_Qwen2.5-Coder-32B-Instruct-6.5-bpw",
             "draft_model": "Qwen_Qwen2.5-Coder-1.5B-Instruct-6.0-bpw",
@@ -116,15 +53,6 @@
                 "max_seq_len": 16384
             },
             "comment": "QVQ"
-        },
-        {
-            "pretty_model_name": "QwQ-Preview-32B-draft",
-            "model_name": "Qwen_QwQ-32B-preview-6.0-bpw",
-            "draft_model": "PowerInfer_SmallThinker-3B-Preview-4.0-bpw",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": "QwQ Preview"
         },
         {
             "pretty_model_name": "homeassistant-llama-8b-4bpw-8k",
@@ -171,15 +99,7 @@
             },
             "comment": "Super long context"
         },
-        {
-            "pretty_model_name": "Llama-3.3-70B-draft",
-            "model_name": "meta-llama_Llama-3.3-70B-Instruct-5.2-bpw",
-            "draft_model": "meta-llama_Llama-3.2-1B-Instruct-6.0-bpw",
-            "tabby_config": {
-                "max_seq_len": 16384
-            },
-            "comment": "Big LLama"
-        },
+        
         {
             "pretty_model_name": "Nemotron-70B-draft",
             "model_name": "nvidia_Llama-3.1-Nemotron-70B-Instruct-HF-5.2-bpw",
@@ -190,36 +110,45 @@
             "comment": "Big LLama"
         },
         {
-            "pretty_model_name": "R1-Distill-Llama-70B-4bpw-draft",
-            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Llama-70B-5.2-bpw",
-            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Llama-8B-5.2-bpw",
-            "tabby_config": {
-                "max_seq_len": 16384
-            },
-            "comment": "Big deepseek"
-        },
-        {
-            "pretty_model_name": "R1-Distill-Qwen2.5-6.5bpw-draft-32k",
-            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Qwen-32B-6.5-bpw",
-            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B-6.5-bpw",
-            "tabby_config": {
-                "max_seq_len": 32768
-            },
-            "comment": "34 GB VRAM (2x4090)"
-        },
-        {
-            "pretty_model_name": "R1-Distill-Qwen2.5-6.5bpw-draft-64k",
-            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Qwen-32B-6.5-bpw",
-            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B-6.5-bpw",
-            "tabby_config": {
-                "max_seq_len": 65536
-            },
-            "comment": "34 GB VRAM (2x4090)"
-        },
-        {
             "pretty_model_name": "Qwen2.5-VL-72B-Draft",
             "model_name": "Qwen_Qwen2.5-VL-72B-Instruct-5.2-bpw",
             "draft_model": "Qwen_Qwen2.5-VL-3B-Instruct-5.2-bpw",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Llama-3.1-8B-ultralong-1m-1m",
+            "model_name": "nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 1073152
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Llama-3.1-8B-ultralong-1m-500k",
+            "model_name": "nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 536576
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Llama-3.1-8B-ultralong-1m-256k",
+            "model_name": "nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 268288
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Llama-3.1-8B-Nemotron Nano",
+            "model_name": "nvidia/Llama-3.1-Nemotron-Nano-8B-v1-8.0-bpw",
+            "draft_model": "",
             "tabby_config": {
                 "max_seq_len": 32768
             },
@@ -248,5 +177,116 @@
             "comment": "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
         }
     ],
-    "lora_configs": []
+    "lora_configs": [],
+    "old_configs": [
+        {
+            "pretty_model_name": "R1-Distill-Llama-70B-4bpw-draft",
+            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Llama-70B-5.2-bpw",
+            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Llama-8B-5.2-bpw",
+            "tabby_config": {
+                "max_seq_len": 16384
+            },
+            "comment": "Big deepseek"
+        },
+        {
+            "pretty_model_name": "R1-Distill-Qwen2.5-6.5bpw-draft-32k",
+            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Qwen-32B-6.5-bpw",
+            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B-6.5-bpw",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": "34 GB VRAM (2x4090)"
+        },
+        {
+            "pretty_model_name": "R1-Distill-Qwen2.5-6.5bpw-draft-64k",
+            "model_name": "deepseek-ai_DeepSeek-R1-Distill-Qwen-32B-6.5-bpw",
+            "draft_model": "deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B-6.5-bpw",
+            "tabby_config": {
+                "max_seq_len": 65536
+            },
+            "comment": "34 GB VRAM (2x4090)"
+        },
+        {
+            "pretty_model_name": "Llama-3.3-70B-draft",
+            "model_name": "meta-llama_Llama-3.3-70B-Instruct-5.2-bpw",
+            "draft_model": "meta-llama_Llama-3.2-1B-Instruct-6.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 16384
+            },
+            "comment": "Big LLama"
+        },
+        {
+            "pretty_model_name": "QwQ-Preview-32B-draft",
+            "model_name": "Qwen_QwQ-32B-preview-6.0-bpw",
+            "draft_model": "PowerInfer_SmallThinker-3B-Preview-4.0-bpw",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": "QwQ Preview"
+        },
+        {
+            "pretty_model_name": "Watt-8B-Tool-Use-32k",
+            "model_name": "watt-ai_watt-tool-8B-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Watt-8B-Tool-Use-132k",
+            "model_name": "watt-ai_watt-tool-8B-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 131072
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Qwen 2.5-14B 500k-5.2 BPW",
+            "model_name": "Qwen_Qwen2.5-14B-Instruct-1M-5.2-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 503808
+            },
+            "comment": "60 GB VRAM Required (3x4090)"
+        },
+        {
+            "pretty_model_name": "Qwen-2.5-7B-1M-5.2 BPW",
+            "model_name": "Qwen_Qwen2.5-7B-Instruct-1M-5.2-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 999424
+            },
+            "comment": "36 GB VRAM Required (2x4090)"
+        },
+        {
+            "pretty_model_name": "Watt-70B-Tool-Use",
+            "model_name": "watt-ai_watt-tool-70B-5.2-bpw",
+            "draft_model": "watt-ai_watt-tool-8B-5.2-bpw",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "QwQ-32B 5.2 BPW",
+            "model_name": "Qwen_QwQ-32B-5.2-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "QwQ-32B 8.0 BPW",
+            "model_name": "Qwen_QwQ-32B-8.0-bpw",
+            "draft_model": "",
+            "tabby_config": {
+                "max_seq_len": 32768
+            },
+            "comment": ""
+        }
+
+    ]
 }
