@@ -78,7 +78,8 @@ backup-repo:
   script:
     - apk add --no-cache tar
     - echo "Backing up repo to NFS share..."
-    - tar -czf "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}.tar.gz" .
+    - mkdir -p "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}"
+    - tar -czf "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-$(date +%Y%m%d-%H%M)-${CI_COMMIT_SHORT_SHA}.tar.gz" .
   only:
-    - main  # or your default branch
-  dependencies: []  # No artifacts needed from previous jobs
+    - main  # or your desired branch
+  dependencies: []  # This avoids pulling artifacts from previous jobs
