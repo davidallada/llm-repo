@@ -1,6 +1,7 @@
 stages:
 - build
 - deploy
+- backup
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -70,3 +71,14 @@ trigger-webhook:
   needs:
   - job: docker-build
     artifacts: false
+
+backup-repo:
+  stage: backup
+  image: alpine
+  script:
+    - apk add --no-cache tar
+    - echo "Backing up repo to NFS share..."
+    - tar -czf "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}.tar.gz" .
+  only:
+    - main  # or your default branch
+  dependencies: []  # No artifacts needed from previous jobs
