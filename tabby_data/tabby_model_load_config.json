@@ -146,7 +146,7 @@
             "comment": ""
         },
         {
-            "pretty_model_name": "Llama-3.1-8B-Nemotron Nano",
+            "pretty_model_name": "Llama-3.1-8B-Nemotron-Nano",
             "model_name": "nvidia/Llama-3.1-Nemotron-Nano-8B-v1-8.0-bpw",
             "draft_model": "",
             "tabby_config": {
