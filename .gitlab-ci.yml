@@ -83,3 +83,5 @@ backup-repo:
   only:
     - main  # or your desired branch
   dependencies: []  # This avoids pulling artifacts from previous jobs
+  tags:
+    - gitlab-backup
