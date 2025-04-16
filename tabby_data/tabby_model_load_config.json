@@ -119,7 +119,7 @@
             "comment": ""
         },
         {
-            "pretty_model_name": "Llama-3.1-8B-ultralong-1m-800k",
+            "pretty_model_name": "Llama-3.1-8B-ultralong-1m-670k",
             "model_name": "nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-8.0-bpw",
             "draft_model": "",
             "tabby_config": {
