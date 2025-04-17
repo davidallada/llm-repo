@@ -29,11 +29,10 @@ backup-repo:
     - gitlab-backup
   before_script:
     - echo "Mounting NFS volume..."
-    - mount -t nfs 10.0.0.10:/export/gitlab-backups /mnt/container_registry
-    - echo "NFS volume mounted at /mnt/container_registry"
+    - mount -t nfs 10.69.1.251:/volume1/container_registry/gitlab-repositories-backup /mnt/container_registry/gitlab-repositories-backup
+    - echo "NFS volume mounted at /mnt/container_registry/gitlab-repositories-backup"
   after_script:
-    - umount /mnt/container_registry
-
+    - umount /mnt/container_registry/gitlab-repositories-backup
 docker-build:
   stage: build
   image:
