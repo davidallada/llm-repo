@@ -28,7 +28,7 @@ backup-repo:
   before_script:
     - echo "Mounting NFS volume..."
     - mkdir -p /mnt/container_registry/gitlab-repositories-backup
-    - mount -t nfs 10.69.1.251:/volume1/container_registry/gitlab-repositories-backup /mnt/container_registry/gitlab-repositories-backup
+    - mount -t nfs -o vers=4 10.69.1.251:/volume1/container_registry/gitlab-repositories-backup /mnt/container_registry/gitlab-repositories-backup
     - echo "NFS volume mounted at /mnt/container_registry/gitlab-repositories-backup"
   after_script:
     - umount /mnt/container_registry/gitlab-repositories-backup
