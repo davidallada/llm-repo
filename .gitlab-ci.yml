@@ -32,6 +32,7 @@ backup-repo:
     - echo "NFS volume mounted at /mnt/container_registry/gitlab-repositories-backup"
   after_script:
     - umount /mnt/container_registry/gitlab-repositories-backup
+
 docker-build:
   stage: build
   image:
