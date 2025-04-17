@@ -1,6 +1,7 @@
 stages:
-  - backup
+  - backup-repo
   - build
+  - backup-image
   - deploy
 
 variables:
@@ -17,7 +18,7 @@ cache:
   policy: pull-push
 
 backup-repo:
-  stage: backup
+  stage: backup-repo
   image: alpine
   script:
     - apk add --no-cache tar
@@ -71,20 +72,6 @@ docker-build:
       --ignore-path=/cache/apt/* \
       --cleanup
 
-    echo "Mounting NFS volume..."
-    mkdir -p /mnt/container_registry/container_registry
-    mount -t nfs -o vers=4 10.69.1.251:/volume1/container_registry/container_registry /mnt/container_registry/container_registry
-    mkdir -p "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}"
-    echo "NFS volume mounted at /mnt/container_registry/container_registry"
-    # Save the built Docker image to a tarball
-    docker save ${CI_REGISTRY_IMAGE}:${VERSION} | gzip > /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz
-
-    # Create a tarball of the repository code (excluding the tarball itself)
-    tar --exclude='*.tar.gz' -czf /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-code.tar.gz -C ${CI_PROJECT_DIR} .
-
-    # Combine the code tarball and Docker image tarball into a single tar.gz file
-    tar -czf /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-full.tar.gz -C /mnt/container_registry/container_registry/${CI_PROJECT_NAME} ${CI_PROJECT_NAME}-${VERSION}-code.tar.gz ${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz
-
   variables:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
@@ -92,6 +79,42 @@ docker-build:
     - if: '$CI_COMMIT_BRANCH'
       exists:
         - docker/Dockerfile
+
+backup-image:
+  stage: backup-image
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache nfs-utils tar gzip
+    - echo "Mounting NFS volume..."
+    - mkdir -p /mnt/container_registry/container_registry
+    - mount -t nfs -o vers=4 10.69.1.251:/volume1/container_registry/container_registry /mnt/container_registry/container_registry
+    - mkdir -p "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}"
+    - echo "NFS volume mounted at /mnt/container_registry/container_registry"
+  script: |
+    VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
+    echo "Saving Docker image to tar.gz..."
+    
+    # Login to Docker registry
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+    # Pull the image
+    docker pull "${CI_REGISTRY_IMAGE}:${VERSION}"
+    
+    # Save the Docker image to a tarball
+    docker save "${CI_REGISTRY_IMAGE}:${VERSION}" | gzip > "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz"
+    
+    echo "Archiving source code..."
+    # Create a tarball of the repository code (excluding the tarball itself)
+    tar --exclude='*.tar.gz' -czf "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-code.tar.gz" -C ${CI_PROJECT_DIR} .
+
+    echo "Combining both into a single archive..."
+    tar -czf "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-full.tar.gz" -C /mnt/container_registry/container_registry/${CI_PROJECT_NAME} "${CI_PROJECT_NAME}-${VERSION}-code.tar.gz" "${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz"
+  dependencies:
+    - docker-build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
 trigger-webhook:
   stage: deploy
