@@ -84,7 +84,8 @@ save-and-archive:
   stage: backup-image
   image: quay.io/buildah/stable:v1.31.0
   before_script:
-    - apk add --no-cache nfs-utils tar gzip
+    - echo "Installing dependencies..."
+    - dnf install -y nfs-utils tar gzip
     - echo "Mounting NFS volume..."
     - mkdir -p /mnt/container_registry/container_registry
     - mount -t nfs -o vers=4 10.69.1.251:/volume1/container_registry/container_registry /mnt/container_registry/container_registry
