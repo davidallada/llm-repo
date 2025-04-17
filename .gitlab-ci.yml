@@ -68,6 +68,21 @@ docker-build:
       --ignore-path=/cache/pip/* \
       --ignore-path=/cache/apt/* \
       --cleanup
+
+    echo "Mounting NFS volume..."
+    mkdir -p /mnt/container_registry/container_registry
+    mount -t nfs -o vers=4 10.69.1.251:/volume1/container_registry/container_registry /mnt/container_registry/container_registry
+    mkdir -p "/mnt/container_registry/container_registry/${CI_PROJECT_NAME}"
+    echo "NFS volume mounted at /mnt/container_registry/container_registry"
+    # Save the built Docker image to a tarball
+    docker save ${CI_REGISTRY_IMAGE}:${VERSION} | gzip > /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz
+
+    # Create a tarball of the repository code (excluding the tarball itself)
+    tar --exclude='*.tar.gz' -czf /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-code.tar.gz -C ${CI_PROJECT_DIR} .
+
+    # Combine the code tarball and Docker image tarball into a single tar.gz file
+    tar -czf /mnt/container_registry/container_registry/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-${VERSION}-full.tar.gz -C /mnt/container_registry/container_registry/${CI_PROJECT_NAME} ${CI_PROJECT_NAME}-${VERSION}-code.tar.gz ${CI_REGISTRY_IMAGE}-${VERSION}.tar.gz
+
   variables:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
