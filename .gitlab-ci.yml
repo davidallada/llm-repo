@@ -1,7 +1,7 @@
 stages:
-- build
-- deploy
-- backup
+  - backup
+  - build
+  - deploy
 
 variables:
   DOCKER_BUILDKIT: 1
@@ -14,18 +14,38 @@ cache:
   - /cache/apt
   policy: pull-push
 
+backup-repo:
+  stage: backup
+  image: alpine
+  script:
+    - apk add --no-cache tar
+    - echo "Backing up repo to NFS share..."
+    - mkdir -p "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}"
+    - tar -czf "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-$(date +%Y%m%d-%H%M)-${CI_COMMIT_SHORT_SHA}.tar.gz" .
+  only:
+    - main  # or your desired branch
+  dependencies: []  # This avoids pulling artifacts from previous jobs
+  tags:
+    - gitlab-backup
+  before_script:
+    - echo "Mounting NFS volume..."
+    - mount -t nfs 10.0.0.10:/export/gitlab-backups /mnt/container_registry
+    - echo "NFS volume mounted at /mnt/container_registry"
+  after_script:
+    - umount /mnt/container_registry
+
 docker-build:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
   before_script:
-  - mkdir -p /cache
-  - mkdir -p /kaniko/.docker
-  - mkdir -p /cache/kaniko
-  - mkdir -p /cache/pip
-  - mkdir -p /cache/apt
-  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - mkdir -p /cache
+    - mkdir -p /kaniko/.docker
+    - mkdir -p /cache/kaniko
+    - mkdir -p /cache/pip
+    - mkdir -p /cache/apt
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
   script: |
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
     echo "Building Docker image with version: $VERSION"
@@ -53,9 +73,9 @@ docker-build:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
   rules:
-  - if: '$CI_COMMIT_BRANCH'
-    exists:
-    - docker/Dockerfile
+    - if: '$CI_COMMIT_BRANCH'
+      exists:
+        - docker/Dockerfile
 
 trigger-webhook:
   stage: deploy
@@ -63,25 +83,11 @@ trigger-webhook:
     name: ubuntu:20.04
     entrypoint: [ "" ]
   before_script:
-  - apt-get update && apt-get install wget -y
+    - apt-get update && apt-get install wget -y
   script:
-  - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
+    - wget --post-data="" "https://portainer.rancher.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
   rules:
-  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   needs:
-  - job: docker-build
-    artifacts: false
-
-backup-repo:
-  stage: backup
-  image: alpine
-  script:
-    - apk add --no-cache tar
-    - echo "Backing up repo to NFS share..."
-    - mkdir -p "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}"
-    - tar -czf "/mnt/container_registry/gitlab-repositories-backup/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-$(date +%Y%m%d-%H%M)-${CI_COMMIT_SHORT_SHA}.tar.gz" .
-  only:
-    - main  # or your desired branch
-  dependencies: []  # This avoids pulling artifacts from previous jobs
-  tags:
-    - gitlab-backup
+    - job: docker-build
+      artifacts: false
