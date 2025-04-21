@@ -9,6 +9,10 @@
             "bpw": []
         },
         {
+            "model_name": "nari-labs/Dia-1.6B",
+            "bpw": []
+        }
+        {
             "model_name": "CohereForAI/c4ai-command-a-03-2025",
             "bpw": [4.0, 5.2]
         },
