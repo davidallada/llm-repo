@@ -1,6 +1,38 @@
 {
     "model_configs": [
         {
+            "model_name": "Qwen/Qwen3-235B-A22B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-30B-A3B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-32B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-14B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-8B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-4B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-1.7B",
+            "bpw": []
+        },
+        {
+            "model_name": "Qwen/Qwen3-0.6B",
+            "bpw": []
+        },
+        {
             "model_name": "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
             "bpw": []
         },
