@@ -2,31 +2,31 @@
     "model_configs": [
         {
             "model_name": "Qwen/Qwen3-30B-A3B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-32B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-14B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-8B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-4B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-1.7B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-0.6B",
-            "bpw": []
+            "bpw": [5.2, 8.0]
         },
         {
             "model_name": "Qwen/Qwen3-235B-A22B",
