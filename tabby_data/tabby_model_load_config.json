@@ -1,6 +1,23 @@
 {
     "model_configs": [
         {
+            "pretty_model_name": "Qwen_Qwen3-30B-A3B",
+            "model_name": "Qwen_Qwen3-30B-A3B-5.2-bpw",
+            "draft_model": "",
+            "tabby_config": {
+            },
+            "comment": ""
+        },
+        {
+            "pretty_model_name": "Qwen_Qwen3-32B",
+            "model_name": "Qwen_Qwen3-32B-5.2-bpw",
+            "draft_model": "",
+            "tabby_config": {
+            },
+            "comment": ""
+        },
+
+        {
             "pretty_model_name": "QwenQwQ-32B Draft",
             "model_name": "Qwen_QwQ-32B-8.0-bpw",
             "draft_model": "InfiniAILab_QwQ-0.5B-8.0-bpw",
