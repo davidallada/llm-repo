@@ -1,13 +1,18 @@
-stages:
-  - backup-repo
-  - build
-  - backup-image
-  - deploy
-
 variables:
   DOCKER_BUILDKIT: 1
   PIP_CACHE_DIR: /cache/pip
   APT_CACHE_DIR: /cache/apt
+  # Build Variables
+  DOCKER_BUILD_CONTEXT_DIR: "${CI_PROJECT_DIR}/docker"
+  DOCKERFILE_PATH: "${CI_PROJECT_DIR}/docker/Dockerfile"
+  PORTAINER_WEBHOOK: "https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
+  DISABLE_DOCKER_BUILD: "false"  # Set to "true" to skip docker-related jobs
+
+stages:
+  - archive-git-repo
+  - build-and-push-docker-image-to-registry
+  - archive-docker-image
+  - run-deploy-webhook
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -17,8 +22,8 @@ cache:
   - /cache/apt
   policy: pull-push
 
-backup-repo:
-  stage: backup-repo
+archive-git-repo:
+  stage: archive-git-repo
   image: alpine
   script:
     - apk add --no-cache tar
@@ -35,13 +40,16 @@ backup-repo:
     - echo "NFS volume mounted at /mnt/container_registry/gitlab-repositories-backup"
   after_script:
     - umount /mnt/container_registry/gitlab-repositories-backup
+  retry: 2
 
-docker-build:
-  stage: build
+build-and-push-docker-image-to-registry:
+  stage: build-and-push-docker-image-to-registry
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [ "" ]
+  retry: 2
   before_script:
+    - mkdir -p /kaniko/tmp
     - mkdir -p /cache
     - mkdir -p /kaniko/.docker
     - mkdir -p /cache/kaniko
@@ -52,11 +60,10 @@ docker-build:
     VERSION="v$(date +%Y.%m.%d).${CI_PIPELINE_IID}"
     echo "Building Docker image with version: $VERSION"
     /kaniko/executor \
-      --context "${CI_PROJECT_DIR}/docker" \
-      --dockerfile "${CI_PROJECT_DIR}/docker/Dockerfile" \
+      --context "${DOCKER_BUILD_CONTEXT_DIR}" \
+      --dockerfile "${DOCKERFILE_PATH}" \
       --destination "${CI_REGISTRY_IMAGE}:${VERSION}" \
       --destination "${CI_REGISTRY_IMAGE}:latest" \
-      --target tabbyapi-exllamav2-builder-image-runtime \
       --cache=true \
       --cache-repo="${CI_REGISTRY_IMAGE}/cache" \
       --cache-dir=/cache \
@@ -71,18 +78,22 @@ docker-build:
       --ignore-path=/cache/pip/* \
       --ignore-path=/cache/apt/* \
       --cleanup
-
   variables:
     PIP_CACHE_DIR: ${CI_PROJECT_DIR}/cache/pip
     APT_CACHE_DIR: ${CI_PROJECT_DIR}/cache/apt
+    TMPDIR: /kaniko/tmp
   rules:
+    - if: '$DISABLE_DOCKER_BUILD == "true"'
+      when: never
+    - exists:
+        - ${DOCKERFILE_PATH}
     - if: '$CI_COMMIT_BRANCH'
-      exists:
-        - docker/Dockerfile
 
-save-and-archive:
-  stage: backup-image
+
+archive-docker-image:
+  stage: archive-docker-image
   image: quay.io/buildah/stable:v1.31.0
+  retry: 2
   before_script:
     - echo "Installing dependencies..."
     - dnf install -y nfs-utils tar gzip
@@ -110,19 +121,23 @@ save-and-archive:
         "${CI_PROJECT_NAME}-${VERSION}-code.tar.gz" \
         "${CI_PROJECT_NAME}-${VERSION}.tar.gz"
   rules:
+    - if: '$DISABLE_DOCKER_BUILD == "true"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
-trigger-webhook:
-  stage: deploy
+run-deploy-webhook:
+  stage: run-deploy-webhook
   image:
     name: ubuntu:20.04
     entrypoint: [ "" ]
+  retry: 2
   before_script:
     - apt-get update && apt-get install wget -y
   script:
-    - wget --post-data="" "https://portainer.internal.devguy.dev/api/stacks/webhooks/9d87571d-679f-4bec-ab84-b6457333003c"
+    - wget --post-data="" "${PORTAINER_WEBHOOK}"
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PORTAINER_WEBHOOK != ""'
+    - when: never
   needs:
-    - job: docker-build
+    - job: build-and-push-docker-image-to-registry
       artifacts: false
